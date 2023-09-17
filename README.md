@@ -1,2 +1,2 @@
-# generateMinecraftPixelArt
-This is a library for generating Minecraft pixel pictures and checking the generated pixel pictures.
+# minecraft-pixel-art
+This is a library for generating Minecraft pixel arts and checking the generated pixel arts.
