@@ -64,3 +64,55 @@ export function convertToObject (
     block
   }
 }
+
+/**
+ * Read FillCommandObject, and fill the specified area of 2D array.
+ * @param fillCommandObject FillCommandObject
+ * @param targetArray 2D array to fill. You need to secure the required size in advance.
+ * @param startX X coordinate of 0,0
+ * @param startY Y coordinate of 0,0
+ * @param planePosition Plane axis
+ * @param planeTarget Plane axis value
+ * @returns Filled 2D array
+ */
+export function addFillCommandObjectToArray (
+  fillCommandObject: FillCommandObject,
+  targetArray: string[][],
+  startX: number,
+  startY: number,
+  planePosition: 'x' | 'y' | 'z',
+  planeTarget: number
+): string[][] {
+  const { fromX, fromY, fromZ, toX, toY, toZ, block } = fillCommandObject
+  const minX = Math.min(fromX, toX)
+  const maxX = Math.max(fromX, toX)
+  const minY = Math.min(fromY, toY)
+  const maxY = Math.max(fromY, toY)
+  const minZ = Math.min(fromZ, toZ)
+  const maxZ = Math.max(fromZ, toZ)
+  const firstMin = (planePosition === 'x' ? minY : minX) - startX
+  const firstMax = (planePosition === 'x' ? maxY : maxX) - startX
+  const secondMin = (planePosition === 'z' ? minY : minZ) - startY
+  const secondMax = (planePosition === 'z' ? maxY : maxZ) - startY
+  const planeMin =
+    planePosition === 'x' ? minX : planePosition === 'y' ? minY : minZ
+  const planeMax =
+    planePosition === 'x' ? maxX : planePosition === 'y' ? maxY : maxZ
+
+  if (!(planeMin <= planeTarget && planeTarget <= planeMax)) {
+    return targetArray.map(row => [...row])
+  }
+
+  const fillArray = targetArray.map((row, rowIndex) => {
+    if (rowIndex < firstMin || rowIndex > firstMax) {
+      return row
+    }
+    return row.map((column, columnIndex) => {
+      if (columnIndex < secondMin || columnIndex > secondMax) {
+        return column
+      }
+      return block
+    })
+  })
+  return fillArray
+}
