@@ -116,3 +116,64 @@ export function addFillCommandObjectToArray (
   })
   return fillArray
 }
+
+/**
+ * Create a 2D array from multiple fill commands.
+ * @param fillCommands An array of fill commands.
+ * @param planePosition The axis of the plane.
+ * @param planeTarget The value of the axis of the plane. Treat the block on the axis of the specified value as a plane.
+ * @param defaultBlock The default block. If no block is specified in the fill command, it will be used.
+ * @returns 2D array
+ */
+export function createArrayFromFillCommands (
+  fillCommands: string[],
+  planePosition: 'x' | 'y' | 'z' = 'y',
+  planeTarget: number = 0,
+  defaultBlock = 'air'
+): string[][] {
+  const fillCommandObjects = fillCommands.map(command =>
+    convertToObject(command, [0, 0, 0])
+  )
+  const { fromX, fromY, fromZ, toX, toY, toZ } = fillCommandObjects.reduce(
+    (prev, current) => {
+      return {
+        fromX: Math.min(prev.fromX, current.fromX),
+        fromY: Math.min(prev.fromY, current.fromY),
+        fromZ: Math.min(prev.fromZ, current.fromZ),
+        toX: Math.max(prev.toX, current.toX),
+        toY: Math.max(prev.toY, current.toY),
+        toZ: Math.max(prev.toZ, current.toZ)
+      }
+    },
+    {
+      fromX: Infinity,
+      fromY: Infinity,
+      fromZ: Infinity,
+      toX: -Infinity,
+      toY: -Infinity,
+      toZ: -Infinity
+    }
+  )
+  const arraySizeX = Math.abs(toX - fromX) + 1
+  const arraySizeY = Math.abs(toY - fromY) + 1
+  const arraySizeZ = Math.abs(toZ - fromZ) + 1
+  const arraySizeFirst = planePosition === 'x' ? arraySizeY : arraySizeX
+  const arraySizeSecond = planePosition === 'z' ? arraySizeY : arraySizeZ
+  let array = Array.from({ length: arraySizeFirst }, () =>
+    Array.from({ length: arraySizeSecond }, () => defaultBlock)
+  )
+  const startFirst = planePosition === 'x' ? fromY : fromX
+  const startSecond = planePosition === 'z' ? fromY : fromZ
+
+  fillCommandObjects.forEach(fillCommandObject => {
+    array = addFillCommandObjectToArray(
+      fillCommandObject,
+      array,
+      startFirst,
+      startSecond,
+      planePosition,
+      planeTarget
+    )
+  })
+  return array
+}

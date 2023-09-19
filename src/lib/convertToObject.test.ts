@@ -1,8 +1,9 @@
 import {
-  PositionArray,
-  convertToObject,
   FillCommandObject,
-  addFillCommandObjectToArray
+  PositionArray,
+  addFillCommandObjectToArray,
+  convertToObject,
+  createArrayFromFillCommands
 } from './convertToObject'
 
 describe('test convertToObject', () => {
@@ -263,6 +264,67 @@ describe('test addFillCommandObjectToArray', () => {
         planePosition,
         planeTarget
       )
+      expect(result).toEqual(expected)
+    })
+  })
+})
+
+describe('test createArrayFromFillCommands', () => {
+  describe.each<[string[], string[][]]>([
+    [
+      [
+        'fill 1 0 1 3 0 3 stone',
+        'fill 1 0 4 3 0 6 white_wool',
+        'fill 1 0 7 3 0 9 stone'
+      ],
+      [
+        [
+          'stone',
+          'stone',
+          'stone',
+          'white_wool',
+          'white_wool',
+          'white_wool',
+          'stone',
+          'stone',
+          'stone'
+        ],
+        [
+          'stone',
+          'stone',
+          'stone',
+          'white_wool',
+          'white_wool',
+          'white_wool',
+          'stone',
+          'stone',
+          'stone'
+        ],
+        [
+          'stone',
+          'stone',
+          'stone',
+          'white_wool',
+          'white_wool',
+          'white_wool',
+          'stone',
+          'stone',
+          'stone'
+        ]
+      ]
+    ],
+    [
+      ['fill 1 0 1 3 0 3 stone', 'fill 2 0 4 4 0 6 white_wool'],
+      [
+        ['stone', 'stone', 'stone', 'air', 'air', 'air'],
+        ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
+        ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
+        ['air', 'air', 'air', 'white_wool', 'white_wool', 'white_wool']
+      ]
+    ]
+  ])('success simple', (commands, expected) => {
+    it(`test createArrayFromFillCommands(${commands[0]})`, () => {
+      const result = createArrayFromFillCommands(commands)
       expect(result).toEqual(expected)
     })
   })
