@@ -177,3 +177,45 @@ export function createArrayFromFillCommands (
   })
   return array
 }
+
+export interface BlockCellData {
+  blockName: string
+  blockNumber: number
+}
+
+/**
+ * From 2D array of String, assign number of the same kind of block,
+ * and return the correspondence between the type of block and the number,
+ * and an array including the number and the name of the block.
+ * @param array 2D array of String
+ * @returns The correspondence between the type of block and the number,
+ * and an array including the number and the name of the block.
+ */
+export function convertArrayToNumberedArray (array: string[][]): {
+  numberedArray: string[]
+  blockMap: BlockCellData[][]
+} {
+  const blockMapArray = new Map<string, number>()
+  let number = 0
+  const blockMap: BlockCellData[][] = array.map(row =>
+    row.map(column => {
+      const blockNumber = blockMapArray.get(column)
+      if (blockNumber === undefined) {
+        blockMapArray.set(column, number)
+        number++
+      }
+      return {
+        blockName: column,
+        blockNumber: blockMapArray.get(column) ?? 0
+      }
+    })
+  )
+  const numberedArray = [] as string[]
+  blockMapArray.forEach((value, key) => {
+    numberedArray[value] = key
+  })
+  return {
+    numberedArray,
+    blockMap
+  }
+}

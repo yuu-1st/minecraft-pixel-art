@@ -1,7 +1,9 @@
 import {
+  BlockCellData,
   FillCommandObject,
   PositionArray,
   addFillCommandObjectToArray,
+  convertArrayToNumberedArray,
   convertToObject,
   createArrayFromFillCommands
 } from './convertToObject'
@@ -325,6 +327,60 @@ describe('test createArrayFromFillCommands', () => {
   ])('success simple', (commands, expected) => {
     it(`test createArrayFromFillCommands(${commands[0]})`, () => {
       const result = createArrayFromFillCommands(commands)
+      expect(result).toEqual(expected)
+    })
+  })
+})
+
+describe('test convertArrayToNumberedArray', () => {
+  describe.each<[string[][], string[], BlockCellData[][]]>([
+    [
+      [
+        ['stone', 'stone', 'stone', 'air', 'air', 'air'],
+        ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
+        ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
+        ['air', 'air', 'air', 'white_wool', 'white_wool', 'white_wool']
+      ],
+      ['stone', 'air', 'white_wool'],
+      [
+        [
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'air', blockNumber: 1 },
+          { blockName: 'air', blockNumber: 1 },
+          { blockName: 'air', blockNumber: 1 }
+        ],
+        [
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'white_wool', blockNumber: 2 },
+          { blockName: 'white_wool', blockNumber: 2 },
+          { blockName: 'white_wool', blockNumber: 2 }
+        ],
+        [
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'stone', blockNumber: 0 },
+          { blockName: 'white_wool', blockNumber: 2 },
+          { blockName: 'white_wool', blockNumber: 2 },
+          { blockName: 'white_wool', blockNumber: 2 }
+        ],
+        [
+          { blockName: 'air', blockNumber: 1 },
+          { blockName: 'air', blockNumber: 1 },
+          { blockName: 'air', blockNumber: 1 },
+          { blockName: 'white_wool', blockNumber: 2 },
+          { blockName: 'white_wool', blockNumber: 2 },
+          { blockName: 'white_wool', blockNumber: 2 }
+        ]
+      ]
+    ]
+  ])('success', (array, numberedArray, blockMap) => {
+    it(`test convertArrayToNumberedArray(${numberedArray.join(',')})`, () => {
+      const result = convertArrayToNumberedArray(array)
+      const expected = { numberedArray, blockMap }
       expect(result).toEqual(expected)
     })
   })
