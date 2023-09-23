@@ -183,6 +183,11 @@ export interface BlockCellData {
   blockNumber: number
 }
 
+export interface MapBlockData {
+  numberedArray: string[]
+  blockMap: BlockCellData[][]
+}
+
 /**
  * From 2D array of String, assign number of the same kind of block,
  * and return the correspondence between the type of block and the number,
@@ -191,10 +196,7 @@ export interface BlockCellData {
  * @returns The correspondence between the type of block and the number,
  * and an array including the number and the name of the block.
  */
-export function convertArrayToNumberedArray (array: string[][]): {
-  numberedArray: string[]
-  blockMap: BlockCellData[][]
-} {
+export function convertArrayToNumberedArray (array: string[][]): MapBlockData {
   const blockMapArray = new Map<string, number>()
   let number = 0
   const blockMap: BlockCellData[][] = array.map(row =>
@@ -218,4 +220,21 @@ export function convertArrayToNumberedArray (array: string[][]): {
     numberedArray,
     blockMap
   }
+}
+
+/**
+ * Create a MapBlockData from a fill command.
+ * @param fillCommand fill command
+ * @returns MapBlockData
+ */
+export function createMapDataFromFill (fillCommand: string): MapBlockData {
+  const formatFillCommand = fillCommand.split('\n').flatMap(command => {
+    if (command.trim().length === 0) {
+      return []
+    }
+    return command.trim()
+  })
+  const fillCommandObject = createArrayFromFillCommands(formatFillCommand)
+  const blockCellData = convertArrayToNumberedArray(fillCommandObject)
+  return blockCellData
 }
