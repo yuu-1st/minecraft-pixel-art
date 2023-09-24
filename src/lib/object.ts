@@ -17,3 +17,12 @@ export function arrayMap<T> (
 ): T[] {
   return Array.from({ length }, (_, index) => callback(index))
 }
+
+/**
+ * This function is used in default clause of switch statement.
+ * This function guarantees that control never reach the default clause.
+ * @param x argument of switch statement
+ */
+export const assertNever = (x: never): never => {
+  throw new Error('This code should not be called')
+}
