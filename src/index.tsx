@@ -1,8 +1,14 @@
 import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import RenderMapTable from './components/RenderMapTable'
-import { convertArrayToNumberedArray, createArrayFromFillCommands } from './lib/convertToObject'
+import {
+  MapBlockData
+} from './lib/convertToObject'
 import { i18nInit } from './lib/i18n'
+import { assertNever } from './lib/object'
+import InputFillCommand from './components/InputFillCommand'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.min.js'
 
 await i18nInit()
 
@@ -11,21 +17,34 @@ if (rootElement === null) {
   throw new Error('root element not found')
 }
 
-/* テストデータ */
-const fill = `
-fill 1 0 1 10 0 50 stone
-fill 11 0 1 20 0 50 white_wool
-fill 21 0 1 30 0 50 red_wool
-fill 31 0 1 40 0 50 white_wool
-fill 41 0 1 50 0 50 blue_wool
-`.split('\n').filter((line) => line !== '')
-const fillString = createArrayFromFillCommands(fill)
-const fillObject = convertArrayToNumberedArray(fillString)
-/* テストデータここまで */
+type ShowComponent = 'inputFillCommand' | 'renderMapTable'
+
+function App (): React.JSX.Element {
+  const [showComponent, setShowComponent] =
+    React.useState<ShowComponent>('inputFillCommand')
+  const [fillCommand, setFillCommand] = React.useState<MapBlockData | null>(null)
+
+  const onDisplayMapTable = (mapBlockData: MapBlockData): void => {
+    setFillCommand(mapBlockData)
+    setShowComponent('renderMapTable')
+  }
+
+  switch (showComponent) {
+    case 'renderMapTable':
+      if (fillCommand === null) {
+        throw new Error('fillCommand is null')
+      }
+      return <RenderMapTable tableItem={fillCommand.blockMap} />
+    case 'inputFillCommand':
+      return <InputFillCommand onDisplayMapTable={onDisplayMapTable} />
+    default:
+      return assertNever(showComponent)
+  }
+}
 
 const root = createRoot(rootElement)
 root.render(
   <StrictMode>
-    <RenderMapTable tableItem={fillObject.blockMap} />
+    <App />
   </StrictMode>
 )
