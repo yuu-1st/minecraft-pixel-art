@@ -1,11 +1,20 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import React from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import {
+  ListGroup,
+  ListGroupItem,
+  OverlayTrigger,
+  Tooltip
+} from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
 import { BlockCellData } from '../lib/convertToObject'
 import { getOneChunkFromArray } from '../lib/getOneChunkFromArray'
 import { arrayMap } from '../lib/object'
+
+const selectedBlockBackgroundStyle: React.CSSProperties = {
+  backgroundColor: 'yellow'
+}
 
 const tdStyle: React.CSSProperties = {
   width: '50px',
@@ -46,16 +55,32 @@ function SquareCellTableTemplate ({
   )
 }
 
-function CellData ({ data }: { data: BlockCellData }): React.JSX.Element {
+function CellData ({
+  data,
+  selectedBlock
+}: {
+  data: BlockCellData
+  selectedBlock: BlockCellData | null
+}): React.JSX.Element {
   if (data.blockNumber === -1) {
     return <>-</>
   }
+  const body = (
+    <div
+      className='h-100 w-100 d-flex justify-content-center align-items-center'
+      {...(selectedBlock?.blockNumber === data.blockNumber
+        ? { style: selectedBlockBackgroundStyle }
+        : {})}
+    >
+      {data.blockNumber}
+    </div>
+  )
   return (
     <OverlayTrigger
       placement='top'
       overlay={<Tooltip id='tooltip-top'>{data.blockName}</Tooltip>}
     >
-      <div>{data.blockNumber}</div>
+      {body}
     </OverlayTrigger>
   )
 }
@@ -63,6 +88,10 @@ function CellData ({ data }: { data: BlockCellData }): React.JSX.Element {
 interface RenderTableMapOneChunkProps {
   /** Table data. */
   tableData: BlockCellData[][]
+  /** Function to display side information. */
+  showSideInfo: (items: BlockCellData[][]) => void
+  /** The currently selected block. */
+  selectedBlock: BlockCellData | null
   /** X coordinate of the chunk to display. */
   chunkX: number
   /** Z coordinate of the chunk to display. */
@@ -71,16 +100,22 @@ interface RenderTableMapOneChunkProps {
 
 function RenderTableMapOneChunk ({
   tableData,
+  showSideInfo,
+  selectedBlock,
   chunkX,
   chunkZ
 }: RenderTableMapOneChunkProps): React.JSX.Element {
   // exchange x and z because they have been reversed
   const table = arrayMap(tableData.length, z => {
     return tableData.map((data, x) => {
-      return <CellData key={x} data={data[z]} />
+      return <CellData key={x} data={data[z]} selectedBlock={selectedBlock} />
     })
   })
-  return <SquareCellTableTemplate cellItem={table} />
+  return (
+    <div onClick={() => showSideInfo(tableData)}>
+      <SquareCellTableTemplate cellItem={table} />
+    </div>
+  )
 }
 
 function MapTableCoordinateX ({
@@ -132,9 +167,13 @@ function MapTableCoordinateZ ({
 }
 
 function RenderTable ({
-  tableData
+  tableData,
+  showSideInfo,
+  selectedBlock
 }: {
   tableData: BlockCellData[][]
+  showSideInfo: (items: BlockCellData[][]) => void
+  selectedBlock: BlockCellData | null
 }): React.JSX.Element {
   const chunkX = Math.ceil(tableData.length / 16)
   const chunkZ = Math.ceil(tableData[0].length / 16)
@@ -162,6 +201,8 @@ function RenderTable ({
           <RenderTableMapOneChunk
             key={z * chunkZ + x}
             tableData={getOneChunkFromArray(tableData, x, z)}
+            showSideInfo={showSideInfo}
+            selectedBlock={selectedBlock}
             chunkX={x}
             chunkZ={z}
           />
@@ -192,7 +233,7 @@ function ZoomControl ({
 }): React.JSX.Element {
   const { t } = useTranslation()
   return (
-    <div className='row'>
+    <div className='row m-0'>
       <div className='col-auto'>{t('zoom')}</div>
       <div className='col'>
         <input
@@ -210,6 +251,93 @@ function ZoomControl ({
   )
 }
 
+interface RenderSideInfoProps {
+  /** Whether to display the side information. */
+  showSideInfo: boolean
+  /** Hide the button. */
+  disableShowSideInfo: () => void
+  /** Receive an array of items to display in SideInfo. */
+  items: BlockCellData[][]
+  /** The currently selected block. */
+  selectedBlock: BlockCellData | null
+  /** Update the selected block. */
+  updateSelectBlock: (block: BlockCellData) => void
+}
+
+function RenderSideInfo ({
+  showSideInfo,
+  disableShowSideInfo,
+  items,
+  selectedBlock,
+  updateSelectBlock
+}: RenderSideInfoProps): React.JSX.Element {
+  const sideInfoStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    width: '20vw',
+    height: '100vh',
+    backgroundColor: 'lightgray'
+  }
+  // itemsに含まれるBlockCellDataを、それぞれ個数をカウントして、重複を削除する
+  const itemFlat = items.flat()
+  const itemLists = itemFlat.reduce<Array<BlockCellData & { count: number }>>(
+    (acc, cur) => {
+      const index = acc.findIndex(item => item.blockNumber === cur.blockNumber)
+      if (index === -1) {
+        acc.push({ ...cur, count: 1 })
+      } else {
+        acc[index].count += 1
+      }
+      return acc
+    },
+    []
+  )
+
+  if (showSideInfo) {
+    return (
+      <div className='position-relative'>
+        <div style={sideInfoStyle}>
+          {/* Display the close button to be hidden */}
+          <button
+            type='button'
+            className='btn-close top-0 end-0 m-2'
+            aria-label='Close'
+            onClick={() => disableShowSideInfo()}
+          />
+          {/* Display list of blockNumber and blockName based on itemList */}
+          <ul className='p-1'>
+            {itemLists.map((item, i) => {
+              return (
+                <ListGroup key={i}>
+                  <ListGroupItem
+                    className='justify-content-center align-items-center'
+                    {...(selectedBlock?.blockNumber === item.blockNumber
+                      ? { style: selectedBlockBackgroundStyle }
+                      : {})}
+                    onClick={() => updateSelectBlock(item)}
+                  >
+                    <div className='row'>
+                      <div className='col-auto justify-content-center'>
+                        {item.blockNumber}
+                      </div>
+                      <div className='col'>
+                        {item.blockName} ({item.count})
+                      </div>
+                    </div>
+                  </ListGroupItem>
+                </ListGroup>
+              )
+            })}
+          </ul>
+        </div>
+      </div>
+    )
+  } else {
+    return <></>
+  }
+}
+
 interface RenderMapTableProps {
   /** Data of the table to be displayed. */
   tableItem: BlockCellData[][]
@@ -218,6 +346,9 @@ interface RenderMapTableProps {
 function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element {
   const { t } = useTranslation()
   const [zoom, setZoom] = React.useState(1)
+  const [showSideInfo, setShowSideInfo] = React.useState(false)
+  const [items, setItems] = React.useState<BlockCellData[][]>([])
+  const [targetItem, setTargetItem] = React.useState<BlockCellData | null>(null)
   return (
     <div className='App'>
       <header className='App-header'>{t('tableTitle')}</header>
@@ -231,8 +362,25 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
           transformOrigin: 'top left'
         }}
       >
-        <RenderTable tableData={tableItem} />
+        <RenderTable
+          tableData={tableItem}
+          showSideInfo={(items: BlockCellData[][]) => {
+            setShowSideInfo(true)
+            setItems(items)
+          }}
+          selectedBlock={targetItem}
+        />
       </div>
+      <RenderSideInfo
+        showSideInfo={showSideInfo}
+        disableShowSideInfo={() => {
+          setShowSideInfo(false)
+          setTargetItem(null)
+        }}
+        selectedBlock={targetItem}
+        updateSelectBlock={(block: BlockCellData) => setTargetItem(block)}
+        items={items}
+      />
     </div>
   )
 }
