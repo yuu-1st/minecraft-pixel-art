@@ -304,31 +304,33 @@ function RenderSideInfo ({
             aria-label='Close'
             onClick={() => disableShowSideInfo()}
           />
-          {/* Display list of blockNumber and blockName based on itemList */}
-          <ul className='p-1'>
-            {itemLists.map((item, i) => {
-              return (
-                <ListGroup key={i}>
-                  <ListGroupItem
-                    className='justify-content-center align-items-center'
-                    {...(selectedBlock?.blockNumber === item.blockNumber
-                      ? { style: selectedBlockBackgroundStyle }
-                      : {})}
-                    onClick={() => updateSelectBlock(item)}
-                  >
-                    <div className='row'>
-                      <div className='col-auto justify-content-center'>
-                        {item.blockNumber}
+          <div className='overflow-auto' style={{ height: '100vh' }}>
+            {/* Display list of blockNumber and blockName based on itemList */}
+            <ul className='p-1'>
+              {itemLists.map((item, i) => {
+                return (
+                  <ListGroup key={i}>
+                    <ListGroupItem
+                      className='justify-content-center align-items-center'
+                      {...(selectedBlock?.blockNumber === item.blockNumber
+                        ? { style: selectedBlockBackgroundStyle }
+                        : {})}
+                      onClick={() => updateSelectBlock(item)}
+                    >
+                      <div className='row'>
+                        <div className='col-auto justify-content-center'>
+                          {item.blockNumber}
+                        </div>
+                        <div className='col'>
+                          {item.blockName} ({item.count})
+                        </div>
                       </div>
-                      <div className='col'>
-                        {item.blockName} ({item.count})
-                      </div>
-                    </div>
-                  </ListGroupItem>
-                </ListGroup>
-              )
-            })}
-          </ul>
+                    </ListGroupItem>
+                  </ListGroup>
+                )
+              })}
+            </ul>
+          </div>
         </div>
       </div>
     )
