@@ -9,6 +9,7 @@ import { assertNever } from './lib/object'
 import InputFillCommand from './components/InputFillCommand'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
+import { Popup } from './components/Alert'
 
 await i18nInit()
 
@@ -45,6 +46,7 @@ function App (): React.JSX.Element {
 const root = createRoot(rootElement)
 root.render(
   <StrictMode>
+    <Popup />
     <App />
   </StrictMode>
 )
