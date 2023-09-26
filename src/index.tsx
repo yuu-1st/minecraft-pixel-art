@@ -9,7 +9,7 @@ import { assertNever } from './lib/object'
 import InputFillCommand from './components/InputFillCommand'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
-import { Popup } from './components/Alert'
+import { Popup } from './components/Popup'
 
 await i18nInit()
 

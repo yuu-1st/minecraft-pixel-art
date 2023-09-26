@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapBlockData, createMapDataFromFill } from '../lib/convertToObject'
 import { ErrorType } from '../lib/i18n'
-import { addPopup } from './Alert'
+import { addPopup } from './Popup'
 
 interface InputFillCommandProps {
   onDisplayMapTable: (mapBlockData: MapBlockData) => void
