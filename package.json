@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/yuu-1st/minecraft-pixel-art#readme",
   "devDependencies": {
+    "@types/color-diff": "^1.2.2",
     "@types/jest": "^29.5.5",
     "@types/node": "^20.6.0",
     "@types/react": "^18.2.22",
@@ -42,11 +43,15 @@
     "vite": "^4.4.9"
   },
   "dependencies": {
+    "animate.css": "^4.1.1",
     "bootstrap": "^5.3.2",
+    "color-diff": "^1.4.0",
     "i18next": "^23.5.1",
+    "jimp": "^0.22.10",
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",
     "react-dom": "^18.2.0",
-    "react-i18next": "^13.2.2"
+    "react-i18next": "^13.2.2",
+    "react-notifications-component": "^4.0.1"
   }
 }
