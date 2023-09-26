@@ -26,3 +26,11 @@ export function arrayMap<T> (
 export const assertNever = (x: never): never => {
   throw new Error('This code should not be called')
 }
+
+/**
+ * Returns a promise that resolves after the specified time.
+ * @param ms Time to wait in milliseconds
+ */
+export async function sleep (ms: number): Promise<void> {
+  await new Promise(resolve => setTimeout(resolve, ms))
+}
