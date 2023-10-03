@@ -17,6 +17,13 @@ export const resources = {
         invalidFillCommand: '無効なFill Commandが含まれています。',
         notFillCommand: 'Fill Commandではないコマンドが含まれています。',
         unknownError: '不明なエラーが発生しました。'
+      },
+      imageToPixelArt: {
+        header: '画像からドット絵を生成する',
+        upload: '画像をアップロード',
+        height: '高さ',
+        fillCommand: 'Fill Commandを生成する',
+        table: 'テーブルを表示する'
       }
     }
   },
@@ -33,6 +40,13 @@ export const resources = {
         invalidFillCommand: 'There is an invalid Fill Command.',
         notFillCommand: 'There is a non-Fill Command.',
         unknownError: 'An unknown error occurred.'
+      },
+      imageToPixelArt: {
+        header: 'Generate pixel art from image',
+        upload: 'Upload image',
+        height: 'Height',
+        fillCommand: 'Generate Fill Command',
+        table: 'Show table'
       }
     }
   }
@@ -50,6 +64,13 @@ export const resources = {
         invalidFillCommand: string
         notFillCommand: string
         unknownError: string
+      }
+      imageToPixelArt: {
+        header: string
+        upload: string
+        height: string
+        fillCommand: string
+        table: string
       }
     }
   }
