@@ -1,6 +1,6 @@
 import assert from 'assert'
 import { closest_lab, rgb_to_lab } from 'color-diff'
-import { ResizeMode, JimpObject, JimpType } from '../@types/jimp'
+import { JimpObject, JimpType, ResizeMode } from '../@types/jimp'
 
 declare const Jimp: JimpObject
 
@@ -28,7 +28,7 @@ export interface ColorPalette {
  * @param height Height after conversion. If you want to maintain the aspect ratio, set either to null.
  * @param width Width after conversion. If you want to maintain the aspect ratio, set either to null.
  * @param resizeMode Resize mode. Default is Jimp.RESIZE_BICUBIC.
- * @returns Converted Jimp
+ * @returns Converted Jimp. Since it is cloned internally, the original Jimp is not modified.
  */
 export function resizeImage (
   image: JimpType,
@@ -39,14 +39,15 @@ export function resizeImage (
   if (height === null && width === null) {
     throw new Error('height and width cannot be null at the same time')
   }
+  const clone = image.clone()
   if (height === null) {
     assert(width !== null)
-    return image.resize(width, Jimp.AUTO, resizeMode)
+    return clone.resize(width, Jimp.AUTO, resizeMode)
   }
   if (width === null) {
-    return image.resize(Jimp.AUTO, height, resizeMode)
+    return clone.resize(Jimp.AUTO, height, resizeMode)
   }
-  return image.resize(width, height, resizeMode)
+  return clone.resize(width, height, resizeMode)
 }
 
 /**
