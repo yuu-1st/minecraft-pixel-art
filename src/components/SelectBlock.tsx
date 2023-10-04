@@ -13,12 +13,14 @@ interface ShowColorBoxProps<I extends number> {
   setBlock: (
     block: 'none' | typeof minecraftColorData[I]['block'][number]
   ) => void
+  count: number
 }
 
 function ShowColorBox ({
   colorData,
   block,
-  setBlock
+  setBlock,
+  count
 }: ShowColorBoxProps<number>): JSX.Element {
   return (
     <div className='row my-3'>
@@ -40,22 +42,25 @@ function ShowColorBox ({
         />
       </div>
       {/* Select the block to use in that color */}
-      <select
-        className='col mx-2'
-        onChange={e => {
-          setBlock(e.target.value as any)
-        }}
-        value={block}
-      >
-        {[none, ...colorData.block].map(blockData => {
-          const block = minecraftBlockData[blockData]
-          return (
-            <option key={blockData} value={blockData}>
-              {block.name.ja}
-            </option>
-          )
-        })}
-      </select>
+      <div className='col mx-2'>
+        <select
+          className='form-select w-100'
+          onChange={e => {
+            setBlock(e.target.value as any)
+          }}
+          value={block}
+        >
+          {[none, ...colorData.block].map(blockData => {
+            const block = minecraftBlockData[blockData]
+            return (
+              <option key={blockData} value={blockData}>
+                {block.name.ja}
+              </option>
+            )
+          })}
+        </select>
+      </div>
+      <div className='col-auto w-25 mx-2'>{count}</div>
     </div>
   )
 }
@@ -79,7 +84,7 @@ function SetColorBlock ({
       />
       {/* Select the block to use in that color */}
       <select
-        className='col mx-2'
+        className='col mx-2 form-select'
         onChange={e => {
           setBlock(e.target.value as any)
         }}
@@ -107,13 +112,15 @@ interface SelectBlockProps {
   ) => void
   selectColorBlock: typeof colorBlockData[number]['key']
   updateSelectColorBlock: (block: typeof colorBlockData[number]['key']) => void
+  count: number[]
 }
 
 function SelectBlock ({
   selectBlock,
   updateSelectBlock,
   selectColorBlock,
-  updateSelectColorBlock
+  updateSelectColorBlock,
+  count
 }: SelectBlockProps): JSX.Element {
   return (
     <div className='m-3'>
@@ -132,6 +139,7 @@ function SelectBlock ({
             setBlock={block => {
               updateSelectBlock(index, block)
             }}
+            count={count[index]}
           />
         )
       })}

@@ -11,7 +11,7 @@ import {
   MapBlockData,
   convertArrayToNumberedArray
 } from '../lib/convertToObject'
-import { sleep } from '../lib/object'
+import { arrayMap, sleep } from '../lib/object'
 import { useTranslation } from 'react-i18next'
 import SelectBlock from './SelectBlock'
 
@@ -28,12 +28,11 @@ async function read (files: FileList): Promise<Jimp> {
   return image
 }
 
-type SetBlockType = 'none' | typeof minecraftColorData[number]['block'][number]
+type SetBlockType = string
 
 async function updateCanvas (
   pixelArtHeight: number,
-  selectBlocks: SetBlockType[],
-  selectColorBlocks: typeof colorBlockData[number]['key']
+  selectBlocks: SetBlockType[]
 ): Promise<void> {
   if (jimpData === null) {
     return
@@ -49,19 +48,13 @@ async function updateCanvas (
         return []
       }
       const colorMag = 220 / 255
-      const colorData = minecraftBlockData[selectBlock]
-      const colorBlock = (colorData.tag as unknown as string[]).includes(
-        'color'
-      )
-        ? selectBlock.replace('item', selectColorBlocks)
-        : selectBlock
       return {
         color: {
           r: Math.round(color.color.r * colorMag),
           g: Math.round(color.color.g * colorMag),
           b: Math.round(color.color.b * colorMag)
         },
-        key: colorBlock
+        key: `${color.id}`
       }
     })
   )
@@ -109,14 +102,24 @@ function ImageToPixelArt ({
       return colorData.block[0]
     })
   )
+  const [selectedBlockCount, setSelectedBlockCount] = React.useState<number[]>(
+    arrayMap(minecraftColorData.length, () => 0)
+  )
   const [selectColorBlock, setSelectColorBlock] = React.useState<
     typeof colorBlockData[number]['key']
   >(colorBlockData[0].key)
 
   useEffect(() => {
     if (isUpdateCanvas) {
-      updateCanvas(pixelArtHeight, selectBlock, selectColorBlock)
+      updateCanvas(pixelArtHeight, selectBlock)
         .then(() => {
+          const counter = arrayMap(minecraftColorData.length, () => 0)
+          colorPalette?.forEach(row => {
+            row.forEach(color => {
+              counter[Number(color.key) - 1]++
+            })
+          })
+          setSelectedBlockCount(counter)
           setIsUpdateCanvas(false)
         })
         .catch(e => {
@@ -150,10 +153,20 @@ function ImageToPixelArt ({
       return
     }
     const nonNullColorPalette = colorPalette
+    const blockIdList = selectBlock.map(block => {
+      const colorData = minecraftBlockData[block]
+      const colorBlock = (colorData.tag as unknown as string[]).includes(
+        'color'
+      )
+        ? block.replace('item', selectColorBlock)
+        : block
+      return colorBlock
+    })
     // Swap the x and z coordinates, since they are reversed
     const blockData = nonNullColorPalette[0].map((_, index) => {
       return nonNullColorPalette.map(row => {
-        return row[index].key
+        const key = Number(row[index].key)
+        return blockIdList[key - 1]
       })
     })
     const mapData = convertArrayToNumberedArray(blockData)
@@ -263,6 +276,7 @@ function ImageToPixelArt ({
           updateSelectBlock={updateSelectBlock}
           selectColorBlock={selectColorBlock}
           updateSelectColorBlock={setSelectColorBlock}
+          count={selectedBlockCount}
         />
       </div>
     </div>
