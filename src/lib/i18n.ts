@@ -24,6 +24,9 @@ export const resources = {
         height: '高さ',
         fillCommand: 'Fill Commandを生成する',
         table: 'テーブルを表示する'
+      },
+      mapTable: {
+        inputCoordinate: '左上の座標'
       }
     }
   },
@@ -47,6 +50,9 @@ export const resources = {
         height: 'Height',
         fillCommand: 'Generate Fill Command',
         table: 'Show table'
+      },
+      mapTable: {
+        inputCoordinate: 'Upper left coordinate'
       }
     }
   }
@@ -71,6 +77,9 @@ export const resources = {
         height: string
         fillCommand: string
         table: string
+      }
+      mapTable: {
+        inputCoordinate: string
       }
     }
   }

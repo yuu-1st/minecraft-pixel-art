@@ -149,7 +149,7 @@ function MapTableCoordinateZ ({
   chunkZ: number
   baseZ: number
 }): React.JSX.Element {
-  const table = (
+  return (
     <SquareCellTableTemplate
       cellItem={arrayMap(16, i => {
         return [
@@ -158,21 +158,20 @@ function MapTableCoordinateZ ({
       })}
     />
   )
-  return (
-    <th key={chunkZ} className='p-0'>
-      {table}
-    </th>
-  )
 }
 
 function RenderTable ({
   tableData,
   showSideInfo,
-  selectedBlock
+  selectedBlock,
+  baseX,
+  baseZ
 }: {
   tableData: BlockCellData[][]
   showSideInfo: (items: BlockCellData[][]) => void
   selectedBlock: BlockCellData | null
+  baseX: number
+  baseZ: number
 }): React.JSX.Element {
   const chunkX = Math.ceil(tableData.length / 16)
   const chunkZ = Math.ceil(tableData[0].length / 16)
@@ -184,21 +183,24 @@ function RenderTable ({
         />
       </th>
       {arrayMap(chunkX, x => {
-        return <MapTableCoordinateX key={x} chunkX={x} baseX={0} />
+        return <MapTableCoordinateX key={`x-${x}`} chunkX={x} baseX={baseX} />
       })}
     </tr>
   )
   const tbody = arrayMap(chunkZ, z => {
     const zAxis = (
-      <th style={{ position: 'sticky', left: 0 }} className='p-0'>
-        <MapTableCoordinateZ chunkZ={z} baseZ={0} />
+      <th
+        key={`th-${z}`}
+        style={{ position: 'sticky', left: 0 }}
+        className='p-0'
+      >
+        <MapTableCoordinateZ chunkZ={z} baseZ={baseZ} />
       </th>
     )
     const chunk = arrayMap(chunkX, x => {
       return (
-        <td key={z} className='p-0'>
+        <td key={`td-${z * chunkZ + x}`} className='p-0'>
           <RenderTableMapOneChunk
-            key={z * chunkZ + x}
             tableData={getOneChunkFromArray(tableData, x, z)}
             showSideInfo={showSideInfo}
             selectedBlock={selectedBlock}
@@ -209,7 +211,7 @@ function RenderTable ({
       )
     })
     return (
-      <tr key={z}>
+      <tr key={`z-${z}`}>
         {zAxis}
         {chunk}
       </tr>
@@ -246,6 +248,42 @@ function ZoomControl ({
         />
       </div>
       <div className='col-auto'>{t('times', { count: zoom })}</div>
+    </div>
+  )
+}
+
+function InputCoordinate ({
+  x,
+  z,
+  setX,
+  setZ
+}: {
+  x: number
+  z: number
+  setX: React.Dispatch<React.SetStateAction<number>>
+  setZ: React.Dispatch<React.SetStateAction<number>>
+}): React.JSX.Element {
+  const { t } = useTranslation()
+  return (
+    <div className='row m-0 align-items-center'>
+      <div className='col-auto'>{t('mapTable.inputCoordinate')}</div>
+      <div className='col'>
+        <input
+          type='number'
+          className='form-control'
+          value={x}
+          onChange={e => setX(Number(e.target.value))}
+        />
+      </div>
+      <div className='col-auto'>:</div>
+      <div className='col'>
+        <input
+          type='number'
+          className='form-control'
+          value={z}
+          onChange={e => setZ(Number(e.target.value))}
+        />
+      </div>
     </div>
   )
 }
@@ -350,9 +388,12 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
   const [showSideInfo, setShowSideInfo] = React.useState(false)
   const [items, setItems] = React.useState<BlockCellData[][]>([])
   const [targetItem, setTargetItem] = React.useState<BlockCellData | null>(null)
+  const [x, setX] = React.useState(0)
+  const [z, setZ] = React.useState(0)
   return (
     <div className='App'>
       <header className='App-header'>{t('tableTitle')}</header>
+      <InputCoordinate x={x} z={z} setX={setX} setZ={setZ} />
       <ZoomControl zoom={zoom} setZoom={setZoom} />
       <div
         className='table-responsive overflow-scroll'
@@ -370,6 +411,8 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
             setItems(items)
           }}
           selectedBlock={targetItem}
+          baseX={Math.floor(x / 16) * 16}
+          baseZ={Math.floor(z / 16) * 16}
         />
       </div>
       <RenderSideInfo
