@@ -1,6 +1,15 @@
 /* some data is used by https://minecraft.fandom.com/wiki/Map_item_format */
 
-export const minecraftColorData = [
+export const minecraftColorData: ReadonlyArray<{
+  id: number
+  key: string
+  color: {
+    r: number
+    g: number
+    b: number
+  }
+  block: readonly string[] // ReadonlyArray<keyof typeof minecraftBlockData>
+}> = [
   {
     id: 1,
     key: 'GRASS',
@@ -387,18 +396,17 @@ export const minecraftColorData = [
     color: { r: 127, g: 167, b: 150 },
     block: ['verdant_froglight', 'glow_lichen']
   }
-] as const satisfies ReadonlyArray<{
-  id: number
-  key: string
-  color: {
-    r: number
-    g: number
-    b: number
-  }
-  block: ReadonlyArray<keyof typeof minecraftBlockData>
-}>
+] as const
 
-export const minecraftBlockData = {
+export const minecraftBlockData: {
+  [key: string]: {
+    name: {
+      ja: string
+      en: string
+    }
+    tag: readonly string[]
+  }
+} = {
   none: { name: { ja: 'なし', en: 'None' }, tag: [] },
   glass_block: { name: { ja: '草ブロック', en: 'Glass Block' }, tag: [] },
   slime_block: { name: { ja: 'スライムブロック', en: 'Slime Block' }, tag: [] },
@@ -745,15 +753,7 @@ export const minecraftBlockData = {
     tag: []
   },
   glow_lichen: { name: { ja: 'ヒカリゴケ', en: 'Glow Lichen' }, tag: [] }
-} as const satisfies {
-  [key: string]: {
-    name: {
-      ja: string
-      en: string
-    }
-    tag: readonly string[]
-  }
-}
+} as const
 
 export const colorBlockData = [
   {
