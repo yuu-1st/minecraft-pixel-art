@@ -4,19 +4,19 @@ import { arrayMap } from './object'
 /**
  * Returns an array of the specified chunk from BlockCellData.
  * @param blockCellData BlockCellData
- * @param horizontal The horizontal position of the chunk
  * @param vertical The vertical position of the chunk
- * @param startHorizontal The horizontal coordinate of the starting point
+ * @param horizontal The horizontal position of the chunk
  * @param startVertical The vertical coordinate of the starting point
+ * @param startHorizontal The horizontal coordinate of the starting point
  * @param defaultBlock The block data to use if no block exists at the target coordinates.
  * @returns An array of the specified chunk
  */
 export function getOneChunkFromArray (
   blockCellData: BlockCellData[][],
-  horizontal: number,
   vertical: number,
-  startHorizontal: number = 0,
+  horizontal: number,
   startVertical: number = 0,
+  startHorizontal: number = 0,
   defaultBlock: BlockCellData = { blockName: '', blockNumber: -1 }
 ): BlockCellData[][] {
   const chunkArray = arrayMap(16, () =>

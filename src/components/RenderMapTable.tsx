@@ -225,10 +225,10 @@ function RenderTable ({
           <RenderTableMapOneChunk
             tableData={getOneChunkFromArray(
               tableData,
-              chunkH,
               chunkV,
-              baseHorizontal,
-              baseVertical
+              chunkH,
+              baseVertical,
+              baseHorizontal
             )}
             showSideInfo={showSideInfo}
             selectedBlock={selectedBlock}

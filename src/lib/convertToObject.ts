@@ -66,22 +66,30 @@ export function convertToObject (
 }
 
 /**
- * Read FillCommandObject, and fill the specified area of 2D array.
+ * FillCommandObject is read, 2D array of specified range is filled.
+ *
+ * The axis created is as follows.
+ * ```
+ * planeAxis => [vertical][horizontal]
+ * x => [z][y]
+ * y => [x][z]
+ * z => [x][y]
+ * ```
  * @param fillCommandObject FillCommandObject
- * @param targetArray 2D array to fill. You need to secure the required size in advance.
- * @param startX X coordinate of 0,0
- * @param startY Y coordinate of 0,0
- * @param planePosition Plane axis
- * @param planeTarget Plane axis value
- * @returns Filled 2D array
+ * @param targetArray 2D array to fill. It is necessary to secure the required size in advance.
+ * @param startVertical Start coordinate of vertical axis (1st dimension)
+ * @param startHorizontal Start coordinate of horizontal axis (2nd dimension)
+ * @param planeAxis Axis of plane to create
+ * @param planePosition Axis value of plane to create
+ * @returns 2D array filled.
  */
 export function addFillCommandObjectToArray (
   fillCommandObject: FillCommandObject,
   targetArray: string[][],
-  startX: number,
-  startY: number,
-  planePosition: 'x' | 'y' | 'z',
-  planeTarget: number
+  startVertical: number,
+  startHorizontal: number,
+  planeAxis: 'x' | 'y' | 'z',
+  planePosition: number
 ): string[][] {
   const { fromX, fromY, fromZ, toX, toY, toZ, block } = fillCommandObject
   const minX = Math.min(fromX, toX)
@@ -90,25 +98,25 @@ export function addFillCommandObjectToArray (
   const maxY = Math.max(fromY, toY)
   const minZ = Math.min(fromZ, toZ)
   const maxZ = Math.max(fromZ, toZ)
-  const firstMin = (planePosition === 'x' ? minY : minX) - startX
-  const firstMax = (planePosition === 'x' ? maxY : maxX) - startX
-  const secondMin = (planePosition === 'z' ? minY : minZ) - startY
-  const secondMax = (planePosition === 'z' ? maxY : maxZ) - startY
+  const verticalMin = (planeAxis === 'x' ? minZ : minX) - startVertical
+  const verticalMax = (planeAxis === 'x' ? maxZ : maxX) - startVertical
+  const horizontalMin = (planeAxis === 'y' ? minZ : minY) - startHorizontal
+  const horizontalMax = (planeAxis === 'y' ? maxZ : maxY) - startHorizontal
   const planeMin =
-    planePosition === 'x' ? minX : planePosition === 'y' ? minY : minZ
+    planeAxis === 'x' ? minX : planeAxis === 'y' ? minY : minZ
   const planeMax =
-    planePosition === 'x' ? maxX : planePosition === 'y' ? maxY : maxZ
+    planeAxis === 'x' ? maxX : planeAxis === 'y' ? maxY : maxZ
 
-  if (!(planeMin <= planeTarget && planeTarget <= planeMax)) {
+  if (!(planeMin <= planePosition && planePosition <= planeMax)) {
     return targetArray.map(row => [...row])
   }
 
   const fillArray = targetArray.map((row, rowIndex) => {
-    if (rowIndex < firstMin || rowIndex > firstMax) {
-      return row
+    if (rowIndex < verticalMin || rowIndex > verticalMax) {
+      return [...row]
     }
     return row.map((column, columnIndex) => {
-      if (columnIndex < secondMin || columnIndex > secondMax) {
+      if (columnIndex < horizontalMin || columnIndex > horizontalMax) {
         return column
       }
       return block
@@ -127,15 +135,15 @@ export interface FillData {
 /**
  * Create a 2D array from multiple fill commands.
  * @param fillCommands An array of fill commands.
- * @param planePosition The axis of the plane.
- * @param planeTarget The value of the axis of the plane. Treat the block on the axis of the specified value as a plane.
+ * @param planeAxis The axis of the plane.
+ * @param planePosition The value of the axis of the plane. Treat the block on the axis of the specified value as a plane.
  * @param defaultBlock The default block. If no block is specified in the fill command, it will be used.
  * @returns 2D array
  */
 export function createArrayFromFillCommands (
   fillCommands: string[],
-  planePosition: 'x' | 'y' | 'z' = 'y',
-  planeTarget: number = 0,
+  planeAxis: 'x' | 'y' | 'z' = 'y',
+  planePosition: number = 0,
   defaultBlock = 'air'
 ): FillData {
   const fillCommandObjects = fillCommands.map(command =>
@@ -164,13 +172,13 @@ export function createArrayFromFillCommands (
   const arraySizeX = Math.abs(toX - fromX) + 1
   const arraySizeY = Math.abs(toY - fromY) + 1
   const arraySizeZ = Math.abs(toZ - fromZ) + 1
-  const arraySizeFirst = planePosition === 'x' ? arraySizeY : arraySizeX
-  const arraySizeSecond = planePosition === 'z' ? arraySizeY : arraySizeZ
+  const arraySizeFirst = planeAxis === 'x' ? arraySizeY : arraySizeX
+  const arraySizeSecond = planeAxis === 'z' ? arraySizeY : arraySizeZ
   let array = Array.from({ length: arraySizeFirst }, () =>
     Array.from({ length: arraySizeSecond }, () => defaultBlock)
   )
-  const startFirst = planePosition === 'x' ? fromY : fromX
-  const startSecond = planePosition === 'z' ? fromY : fromZ
+  const startFirst = planeAxis === 'x' ? fromY : fromX
+  const startSecond = planeAxis === 'z' ? fromY : fromZ
 
   fillCommandObjects.forEach(fillCommandObject => {
     array = addFillCommandObjectToArray(
@@ -178,8 +186,8 @@ export function createArrayFromFillCommands (
       array,
       startFirst,
       startSecond,
-      planePosition,
-      planeTarget
+      planeAxis,
+      planePosition
     )
   })
   return {
