@@ -1,6 +1,8 @@
 import {
   BlockCellData,
   FillCommandObject,
+  FillData,
+  MapBlockData,
   PositionArray,
   addFillCommandObjectToArray,
   convertArrayToNumberedArray,
@@ -272,57 +274,67 @@ describe('test addFillCommandObjectToArray', () => {
 })
 
 describe('test createArrayFromFillCommands', () => {
-  describe.each<[string[], string[][]]>([
+  describe.each<[string[], FillData]>([
     [
       [
         'fill 1 0 1 3 0 3 stone',
         'fill 1 0 4 3 0 6 white_wool',
         'fill 1 0 7 3 0 9 stone'
       ],
-      [
-        [
-          'stone',
-          'stone',
-          'stone',
-          'white_wool',
-          'white_wool',
-          'white_wool',
-          'stone',
-          'stone',
-          'stone'
+      {
+        mapBlock: [
+          [
+            'stone',
+            'stone',
+            'stone',
+            'white_wool',
+            'white_wool',
+            'white_wool',
+            'stone',
+            'stone',
+            'stone'
+          ],
+          [
+            'stone',
+            'stone',
+            'stone',
+            'white_wool',
+            'white_wool',
+            'white_wool',
+            'stone',
+            'stone',
+            'stone'
+          ],
+          [
+            'stone',
+            'stone',
+            'stone',
+            'white_wool',
+            'white_wool',
+            'white_wool',
+            'stone',
+            'stone',
+            'stone'
+          ]
         ],
-        [
-          'stone',
-          'stone',
-          'stone',
-          'white_wool',
-          'white_wool',
-          'white_wool',
-          'stone',
-          'stone',
-          'stone'
-        ],
-        [
-          'stone',
-          'stone',
-          'stone',
-          'white_wool',
-          'white_wool',
-          'white_wool',
-          'stone',
-          'stone',
-          'stone'
-        ]
-      ]
+        minX: 1,
+        minY: 0,
+        minZ: 1
+      }
     ],
     [
       ['fill 1 0 1 3 0 3 stone', 'fill 2 0 4 4 0 6 white_wool'],
-      [
-        ['stone', 'stone', 'stone', 'air', 'air', 'air'],
-        ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
-        ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
-        ['air', 'air', 'air', 'white_wool', 'white_wool', 'white_wool']
-      ]
+      {
+        mapBlock: [
+          ['stone', 'stone', 'stone', 'air', 'air', 'air'],
+          ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
+          ['stone', 'stone', 'stone', 'white_wool', 'white_wool', 'white_wool'],
+          ['air', 'air', 'air', 'white_wool', 'white_wool', 'white_wool']
+        ],
+        minX: 1,
+        minY: 0,
+        minZ: 1
+      }
     ]
   ])('success simple', (commands, expected) => {
     it(`test createArrayFromFillCommands(${commands[0]})`, () => {
@@ -332,8 +344,14 @@ describe('test createArrayFromFillCommands', () => {
   })
 })
 
+interface Pos {
+  minX: number
+  minY: number
+  minZ: number
+}
+
 describe('test convertArrayToNumberedArray', () => {
-  describe.each<[string[][], string[], BlockCellData[][]]>([
+  describe.each<[string[][], string[], BlockCellData[][], Pos]>([
     [
       [
         ['stone', 'stone', 'stone', 'air', 'air', 'air'],
@@ -375,12 +393,13 @@ describe('test convertArrayToNumberedArray', () => {
           { blockName: 'white_wool', blockNumber: 2 },
           { blockName: 'white_wool', blockNumber: 2 }
         ]
-      ]
+      ],
+      { minX: 0, minY: 0, minZ: 0 }
     ]
-  ])('success', (array, numberedArray, blockMap) => {
+  ])('success', (array, numberedArray, blockMap, pos) => {
     it(`test convertArrayToNumberedArray(${numberedArray.join(',')})`, () => {
-      const result = convertArrayToNumberedArray(array)
-      const expected = { numberedArray, blockMap }
+      const result = convertArrayToNumberedArray({ mapBlock: array, ...pos })
+      const expected: MapBlockData = { numberedArray, blockMap, ...pos }
       expect(result).toEqual(expected)
     })
   })

@@ -117,6 +117,13 @@ export function addFillCommandObjectToArray (
   return fillArray
 }
 
+export interface FillData {
+  mapBlock: string[][]
+  minX: number
+  minY: number
+  minZ: number
+}
+
 /**
  * Create a 2D array from multiple fill commands.
  * @param fillCommands An array of fill commands.
@@ -130,7 +137,7 @@ export function createArrayFromFillCommands (
   planePosition: 'x' | 'y' | 'z' = 'y',
   planeTarget: number = 0,
   defaultBlock = 'air'
-): string[][] {
+): FillData {
   const fillCommandObjects = fillCommands.map(command =>
     convertToObject(command, [0, 0, 0])
   )
@@ -175,7 +182,12 @@ export function createArrayFromFillCommands (
       planeTarget
     )
   })
-  return array
+  return {
+    mapBlock: array,
+    minX: fromX,
+    minY: fromY,
+    minZ: fromZ
+  }
 }
 
 export interface BlockCellData {
@@ -186,6 +198,9 @@ export interface BlockCellData {
 export interface MapBlockData {
   numberedArray: string[]
   blockMap: BlockCellData[][]
+  minX: number
+  minY: number
+  minZ: number
 }
 
 /**
@@ -196,10 +211,10 @@ export interface MapBlockData {
  * @returns The correspondence between the type of block and the number,
  * and an array including the number and the name of the block.
  */
-export function convertArrayToNumberedArray (array: string[][]): MapBlockData {
+export function convertArrayToNumberedArray (array: FillData): MapBlockData {
   const blockMapArray = new Map<string, number>()
   let number = 0
-  const blockMap: BlockCellData[][] = array.map(row =>
+  const blockMap: BlockCellData[][] = array.mapBlock.map(row =>
     row.map(column => {
       const blockNumber = blockMapArray.get(column)
       if (blockNumber === undefined) {
@@ -218,7 +233,10 @@ export function convertArrayToNumberedArray (array: string[][]): MapBlockData {
   })
   return {
     numberedArray,
-    blockMap
+    blockMap,
+    minX: array.minX,
+    minY: array.minY,
+    minZ: array.minZ
   }
 }
 

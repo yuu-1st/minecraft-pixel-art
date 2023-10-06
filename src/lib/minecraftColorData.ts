@@ -298,7 +298,7 @@ export const minecraftColorData: ReadonlyArray<{
     id: 45,
     key: 'TERRACOTTA_CYAN',
     color: { r: 87, g: 92, b: 92 },
-    block: ['mud', 'cyan_terracotta']
+    block: ['cyan_terracotta', 'mud']
   },
   {
     id: 46,

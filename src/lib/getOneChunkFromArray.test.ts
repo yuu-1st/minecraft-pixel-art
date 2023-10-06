@@ -14,11 +14,12 @@ describe('getOneChunkFromArray', () => {
     /fill 20 0 40 40 0 60 cyan_wool
     /fill 40 0 40 60 0 60 blue_wool
     `
-  const { blockMap, numberedArray } =
-    createMapDataFromFill(fillCommand)
+  const { blockMap, numberedArray } = createMapDataFromFill(fillCommand)
   // blockMapはconvertToObject.test.tsでテスト済みであることが前提
 
-  const findNumberedArray = (block: string): { blockName: string, blockNumber: number } => {
+  const findNumberedArray = (
+    block: string
+  ): { blockName: string, blockNumber: number } => {
     const findIndex = numberedArray.findIndex(
       numberedBlock => numberedBlock === block
     )
@@ -56,12 +57,43 @@ describe('getOneChunkFromArray', () => {
           }
         })
       )
+    ],
+    [
+      [-1, 0],
+      arrayMap(16, indexX =>
+        arrayMap(16, indexZ => {
+          return { blockName: '', blockNumber: -1 }
+        })
+      )
     ]
   ])('success simple', (chunk, expected) => {
     it(`test getOneChunkFromArray(${chunk[0]}, ${chunk[1]})`, () => {
       expect(getOneChunkFromArray(blockMap, chunk[0], chunk[1])).toEqual(
         expected
       )
+    })
+  })
+
+  describe.each([
+    [
+      [0, 0],
+      1,
+      0,
+      arrayMap(16, indexX =>
+        arrayMap(16, indexZ => {
+          if (indexX < 1) {
+            return { blockName: '', blockNumber: -1 }
+          } else {
+            return findNumberedArray('stone')
+          }
+        })
+      )
+    ]
+  ])('success with startX and startZ', (chunk, startX, startZ, expected) => {
+    it(`test getOneChunkFromArray(${chunk[0]}, ${chunk[1]}, ${startX}, ${startZ})`, () => {
+      expect(
+        getOneChunkFromArray(blockMap, chunk[0], chunk[1], startX, startZ)
+      ).toEqual(expected)
     })
   })
 })

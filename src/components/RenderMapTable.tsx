@@ -7,7 +7,7 @@ import {
 } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
-import { BlockCellData } from '../lib/convertToObject'
+import { BlockCellData, MapBlockData } from '../lib/convertToObject'
 import { getOneChunkFromArray } from '../lib/getOneChunkFromArray'
 import { arrayMap } from '../lib/object'
 
@@ -91,23 +91,22 @@ interface RenderTableMapOneChunkProps {
   showSideInfo: (items: BlockCellData[][]) => void
   /** The currently selected block. */
   selectedBlock: BlockCellData | null
-  /** X coordinate of the chunk to display. */
-  chunkX: number
-  /** Z coordinate of the chunk to display. */
-  chunkZ: number
+  /** horizontal coordinate of the chunk to display. */
+  chunkHorizontal: number
+  /** vertical coordinate of the chunk to display. */
+  chunkVertical: number
 }
 
 function RenderTableMapOneChunk ({
   tableData,
   showSideInfo,
   selectedBlock,
-  chunkX,
-  chunkZ
+  chunkHorizontal,
+  chunkVertical
 }: RenderTableMapOneChunkProps): React.JSX.Element {
-  // exchange x and z because they have been reversed
-  const table = arrayMap(tableData.length, z => {
-    return tableData.map((data, x) => {
-      return <CellData key={x} data={data[z]} selectedBlock={selectedBlock} />
+  const table = arrayMap(tableData.length, v => {
+    return tableData[v].map((data, h) => {
+      return <CellData key={h} data={data} selectedBlock={selectedBlock} />
     })
   })
   return (
@@ -117,43 +116,47 @@ function RenderTableMapOneChunk ({
   )
 }
 
-function MapTableCoordinateX ({
-  chunkX,
-  baseX
+function MapTableCoordinateHorizontal ({
+  chunkHorizontal,
+  baseHorizontal
 }: {
-  chunkX: number
-  baseX: number
+  chunkHorizontal: number
+  baseHorizontal: number
 }): React.JSX.Element {
   const table = (
     <SquareCellTableTemplate
       cellItem={[
         arrayMap(16, i => {
           return (
-            <React.Fragment key={i}>{chunkX * 16 + i + baseX}</React.Fragment>
+            <React.Fragment key={i}>
+              {chunkHorizontal * 16 + i + baseHorizontal}
+            </React.Fragment>
           )
         })
       ]}
     />
   )
   return (
-    <th key={chunkX} className='p-0'>
+    <th key={chunkHorizontal} className='p-0'>
       {table}
     </th>
   )
 }
 
-function MapTableCoordinateZ ({
-  chunkZ,
-  baseZ
+function MapTableCoordinateVertical ({
+  chunkVertical,
+  baseVertical
 }: {
-  chunkZ: number
-  baseZ: number
+  chunkVertical: number
+  baseVertical: number
 }): React.JSX.Element {
   return (
     <SquareCellTableTemplate
       cellItem={arrayMap(16, i => {
         return [
-          <React.Fragment key={i}>{chunkZ * 16 + i + baseZ}</React.Fragment>
+          <React.Fragment key={i}>
+            {chunkVertical * 16 + i + baseVertical}
+          </React.Fragment>
         ]
       })}
     />
@@ -164,62 +167,85 @@ function RenderTable ({
   tableData,
   showSideInfo,
   selectedBlock,
-  baseX,
-  baseZ
+  baseVertical,
+  baseHorizontal
 }: {
   tableData: BlockCellData[][]
   showSideInfo: (items: BlockCellData[][]) => void
   selectedBlock: BlockCellData | null
-  baseX: number
-  baseZ: number
+  baseVertical: number
+  baseHorizontal: number
 }): React.JSX.Element {
-  const chunkX = Math.ceil(tableData.length / 16)
-  const chunkZ = Math.ceil(tableData[0].length / 16)
-  const xAxis = (
+  function getChunkCount (start: number, end: number): number {
+    const startChunk = Math.floor(start / 16)
+    const endChunk = Math.floor(end / 16)
+    const chunkCount = endChunk - startChunk + 1
+    return chunkCount
+  }
+  const useChunkVertical = getChunkCount(baseVertical, baseVertical + tableData.length - 1)
+  const useChunkHorizontal = getChunkCount(baseHorizontal, baseHorizontal + tableData[0].length - 1)
+  const hAxis = (
     <tr>
       <th style={{ position: 'sticky', left: 0 }} className='p-0'>
         <SquareCellTableTemplate
           cellItem={[[<React.Fragment key='cellItemKey'> </React.Fragment>]]}
         />
       </th>
-      {arrayMap(chunkX, x => {
-        return <MapTableCoordinateX key={`x-${x}`} chunkX={x} baseX={baseX} />
+      {arrayMap(useChunkHorizontal, h => {
+        return (
+          <MapTableCoordinateHorizontal
+            key={`h-${h}`}
+            chunkHorizontal={h}
+            baseHorizontal={Math.floor(baseHorizontal / 16) * 16}
+          />
+        )
       })}
     </tr>
   )
-  const tbody = arrayMap(chunkZ, z => {
-    const zAxis = (
+  const tbody = arrayMap(useChunkVertical, v => {
+    const vAxis = (
       <th
-        key={`th-${z}`}
+        key={`th-${v}`}
         style={{ position: 'sticky', left: 0 }}
         className='p-0'
       >
-        <MapTableCoordinateZ chunkZ={z} baseZ={baseZ} />
+        <MapTableCoordinateVertical
+          chunkVertical={v}
+          baseVertical={Math.floor(baseVertical / 16) * 16}
+        />
       </th>
     )
-    const chunk = arrayMap(chunkX, x => {
+    const chunkV = Math.floor(baseVertical / 16) + v
+    const chunk = arrayMap(useChunkHorizontal, h => {
+      const chunkH = Math.floor(baseHorizontal / 16) + h
       return (
-        <td key={`td-${z * chunkZ + x}`} className='p-0'>
+        <td key={`td-${v * useChunkHorizontal + h}`} className='p-0'>
           <RenderTableMapOneChunk
-            tableData={getOneChunkFromArray(tableData, x, z)}
+            tableData={getOneChunkFromArray(
+              tableData,
+              chunkH,
+              chunkV,
+              baseHorizontal,
+              baseVertical
+            )}
             showSideInfo={showSideInfo}
             selectedBlock={selectedBlock}
-            chunkX={x}
-            chunkZ={z}
+            chunkHorizontal={v}
+            chunkVertical={h}
           />
         </td>
       )
     })
     return (
-      <tr key={`z-${z}`}>
-        {zAxis}
+      <tr key={`hb-${v}`}>
+        {vAxis}
         {chunk}
       </tr>
     )
   })
   return (
     <Table bordered className='m-0 bg-primary'>
-      <thead className='bg-white sticky-top p-0'>{xAxis}</thead>
+      <thead className='bg-white sticky-top p-0'>{hAxis}</thead>
       <tbody>{tbody}</tbody>
     </Table>
   )
@@ -252,42 +278,6 @@ function ZoomControl ({
   )
 }
 
-function InputCoordinate ({
-  x,
-  z,
-  setX,
-  setZ
-}: {
-  x: number
-  z: number
-  setX: React.Dispatch<React.SetStateAction<number>>
-  setZ: React.Dispatch<React.SetStateAction<number>>
-}): React.JSX.Element {
-  const { t } = useTranslation()
-  return (
-    <div className='row m-0 align-items-center'>
-      <div className='col-auto'>{t('mapTable.inputCoordinate')}</div>
-      <div className='col'>
-        <input
-          type='number'
-          className='form-control'
-          value={x}
-          onChange={e => setX(Number(e.target.value))}
-        />
-      </div>
-      <div className='col-auto'>:</div>
-      <div className='col'>
-        <input
-          type='number'
-          className='form-control'
-          value={z}
-          onChange={e => setZ(Number(e.target.value))}
-        />
-      </div>
-    </div>
-  )
-}
-
 interface RenderSideInfoProps {
   /** Whether to display the side information. */
   showSideInfo: boolean
@@ -316,7 +306,7 @@ function RenderSideInfo ({
     height: '100vh',
     backgroundColor: 'lightgray'
   }
-  // itemsに含まれるBlockCellDataを、それぞれ個数をカウントして、重複を削除する
+  // Count the number of each BlockCellData included in items and remove duplicates
   const itemFlat = items.flat()
   const itemLists = itemFlat.reduce<Array<BlockCellData & { count: number }>>(
     (acc, cur) => {
@@ -379,7 +369,7 @@ function RenderSideInfo ({
 
 interface RenderMapTableProps {
   /** Data of the table to be displayed. */
-  tableItem: BlockCellData[][]
+  tableItem: MapBlockData
 }
 
 function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element {
@@ -388,12 +378,9 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
   const [showSideInfo, setShowSideInfo] = React.useState(false)
   const [items, setItems] = React.useState<BlockCellData[][]>([])
   const [targetItem, setTargetItem] = React.useState<BlockCellData | null>(null)
-  const [x, setX] = React.useState(0)
-  const [z, setZ] = React.useState(0)
   return (
     <div className='App'>
       <header className='App-header'>{t('tableTitle')}</header>
-      <InputCoordinate x={x} z={z} setX={setX} setZ={setZ} />
       <ZoomControl zoom={zoom} setZoom={setZoom} />
       <div
         className='table-responsive overflow-scroll'
@@ -405,14 +392,14 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
         }}
       >
         <RenderTable
-          tableData={tableItem}
+          tableData={tableItem.blockMap}
           showSideInfo={(items: BlockCellData[][]) => {
             setShowSideInfo(true)
             setItems(items)
           }}
           selectedBlock={targetItem}
-          baseX={Math.floor(x / 16) * 16}
-          baseZ={Math.floor(z / 16) * 16}
+          baseVertical={tableItem.minX}
+          baseHorizontal={tableItem.minZ}
         />
       </div>
       <RenderSideInfo

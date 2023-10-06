@@ -86,6 +86,50 @@ async function updateCanvas (
   ctx.putImageData(imageData, 0, 0)
 }
 
+function InputCoordinate ({
+  x,
+  y,
+  z,
+  setX,
+  setY,
+  setZ
+}: {
+  x: number
+  y: number
+  z: number
+  setX: React.Dispatch<React.SetStateAction<number>>
+  setY: React.Dispatch<React.SetStateAction<number>>
+  setZ: React.Dispatch<React.SetStateAction<number>>
+}): React.JSX.Element {
+  const { t } = useTranslation()
+  return (
+    <div className='row m-0 align-items-center'>
+      <div className='col-auto g-1'>{t('mapTable.inputCoordinate')}</div>
+      <div className='col-auto'> x :</div>
+      <input
+        type='number'
+        className='col form-control'
+        value={x}
+        onChange={e => setX(Number(e.target.value))}
+      />
+      <div className='col-auto'> y :</div>
+      <input
+        type='number'
+        className='form-control col'
+        value={y}
+        onChange={e => setY(Number(e.target.value))}
+      />
+      <div className='col-auto'> z :</div>
+      <input
+        type='number'
+        className='form-control col'
+        value={z}
+        onChange={e => setZ(Number(e.target.value))}
+      />
+    </div>
+  )
+}
+
 type SelectButtonType = 'fill' | 'table' | null
 
 function ImageToPixelArt ({
@@ -108,6 +152,9 @@ function ImageToPixelArt ({
   const [selectColorBlock, setSelectColorBlock] = React.useState<
     typeof colorBlockData[number]['key']
   >(colorBlockData[0].key)
+  const [positionX, setPositionX] = React.useState(0)
+  const [positionY, setPositionY] = React.useState(0)
+  const [positionZ, setPositionZ] = React.useState(0)
 
   useEffect(() => {
     if (isUpdateCanvas) {
@@ -162,14 +209,18 @@ function ImageToPixelArt ({
         : block
       return colorBlock
     })
-    // Swap the x and z coordinates, since they are reversed
-    const blockData = nonNullColorPalette[0].map((_, index) => {
-      return nonNullColorPalette.map(row => {
-        const key = Number(row[index].key)
+    const blockData = nonNullColorPalette.map(row => {
+      return row.map(color => {
+        const key = Number(color.key)
         return blockIdList[key - 1]
       })
     })
-    const mapData = convertArrayToNumberedArray(blockData)
+    const mapData = convertArrayToNumberedArray({
+      mapBlock: blockData,
+      minX: positionX,
+      minY: positionY,
+      minZ: positionZ
+    })
     setSelectButton('table')
     void (async () => {
       await sleep(50)
@@ -238,6 +289,16 @@ function ImageToPixelArt ({
             />
           </div>
           <div className='col-auto'>{pixelArtHeight}</div>
+        </div>
+        <div>
+          <InputCoordinate
+            x={positionX}
+            y={positionY}
+            z={positionZ}
+            setX={setPositionX}
+            setY={setPositionY}
+            setZ={setPositionZ}
+          />
         </div>
         {/* Create two buttons, one to create Fill Command and one to display the table */}
         <div className='row justify-content-center m-0'>
