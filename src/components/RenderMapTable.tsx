@@ -9,6 +9,7 @@ import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
 import { BlockCellData, MapBlockData } from '../lib/convertToObject'
 import { getOneChunkFromArray } from '../lib/getOneChunkFromArray'
+import { convertBlockKeyToName } from '../lib/minecraftDataFunction'
 import { arrayMap } from '../lib/object'
 
 const selectedBlockBackgroundStyle: React.CSSProperties = {
@@ -74,10 +75,11 @@ function CellData ({
       {data.blockNumber}
     </div>
   )
+  const blockName = convertBlockKeyToName(data.blockName, 'ja')
   return (
     <OverlayTrigger
       placement='top'
-      overlay={<Tooltip id='tooltip-top'>{data.blockName}</Tooltip>}
+      overlay={<Tooltip id='tooltip-top'>{blockName}</Tooltip>}
     >
       {body}
     </OverlayTrigger>
@@ -312,7 +314,8 @@ function RenderSideInfo ({
     (acc, cur) => {
       const index = acc.findIndex(item => item.blockNumber === cur.blockNumber)
       if (index === -1) {
-        acc.push({ ...cur, count: 1 })
+        const blockName = convertBlockKeyToName(cur.blockName, 'ja')
+        acc.push({ ...cur, count: 1, blockName })
       } else {
         acc[index].count += 1
       }

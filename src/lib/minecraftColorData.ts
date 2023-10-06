@@ -777,3 +777,86 @@ export const colorBlockData = [
     name: { ja: 'コンクリート', en: 'Concrete' }
   }
 ] as const
+
+export const colorData = [
+  {
+    id: 0,
+    key: 'white',
+    name: { ja: '白色', en: 'White' }
+  },
+  {
+    id: 1,
+    key: 'orange',
+    name: { ja: '橙色', en: 'Orange' }
+  },
+  {
+    id: 2,
+    key: 'magenta',
+    name: { ja: '赤紫色', en: 'Magenta' }
+  },
+  {
+    id: 3,
+    key: 'light_blue',
+    name: { ja: '空色', en: 'Light Blue' }
+  },
+  {
+    id: 4,
+    key: 'yellow',
+    name: { ja: '黄色', en: 'Yellow' }
+  },
+  {
+    id: 5,
+    key: 'lime',
+    name: { ja: '黄緑色', en: 'Lime' }
+  },
+  {
+    id: 6,
+    key: 'pink',
+    name: { ja: '桃色', en: 'Pink' }
+  },
+  {
+    id: 7,
+    key: 'gray',
+    name: { ja: '灰色', en: 'Gray' }
+  },
+  {
+    id: 8,
+    key: 'light_gray',
+    name: { ja: '薄灰色', en: 'Light Gray' }
+  },
+  {
+    id: 9,
+    key: 'cyan',
+    name: { ja: '青緑色', en: 'Cyan' }
+  },
+  {
+    id: 10,
+    key: 'purple',
+    name: { ja: '紫色', en: 'Purple' }
+  },
+  {
+    id: 11,
+    key: 'blue',
+    name: { ja: '青色', en: 'Blue' }
+  },
+  {
+    id: 12,
+    key: 'brown',
+    name: { ja: '茶色', en: 'Brown' }
+  },
+  {
+    id: 13,
+    key: 'green',
+    name: { ja: '緑色', en: 'Green' }
+  },
+  {
+    id: 14,
+    key: 'red',
+    name: { ja: '赤色', en: 'Red' }
+  },
+  {
+    id: 15,
+    key: 'black',
+    name: { ja: '黒色', en: 'Black' }
+  }
+] as const
