@@ -11,7 +11,8 @@ export const resources = {
       times: '{{count}}倍',
       inputFill: {
         header: 'Fill Commandを入力してください。',
-        send: '生成'
+        send: '地図を生成する',
+        inputImage: '画像から生成する'
       },
       errorMessage: {
         invalidFillCommand: '無効なFill Commandが含まれています。',
@@ -37,7 +38,8 @@ export const resources = {
       times: '{{count}} times',
       inputFill: {
         header: 'Please enter the Fill Command.',
-        send: 'Generate'
+        send: 'Generate map',
+        inputImage: 'Generate from image'
       },
       errorMessage: {
         invalidFillCommand: 'There is an invalid Fill Command.',
@@ -65,6 +67,7 @@ export const resources = {
       inputFill: {
         header: string
         send: string
+        inputImage: string
       }
       errorMessage: {
         invalidFillCommand: string
