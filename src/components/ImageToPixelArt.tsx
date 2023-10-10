@@ -14,6 +14,7 @@ import {
 import { arrayMap, sleep } from '../lib/object'
 import { useTranslation } from 'react-i18next'
 import SelectBlock from './SelectBlock'
+import { convertToFillCommand } from '../lib/convertToFillCommand'
 
 let jimpData: Jimp | null = null
 let colorPalette: ColorPalette[][] | null = null
@@ -155,6 +156,7 @@ function ImageToPixelArt ({
   const [positionX, setPositionX] = React.useState(0)
   const [positionY, setPositionY] = React.useState(0)
   const [positionZ, setPositionZ] = React.useState(0)
+  const [fillCommand, setFillCommand] = React.useState<string | null>(null)
 
   useEffect(() => {
     if (isUpdateCanvas) {
@@ -226,6 +228,37 @@ function ImageToPixelArt ({
       await sleep(50)
       onDisplayMapTable(mapData)
     })()
+  }
+
+  const onClickFillCommand = (): void => {
+    if (colorPalette === null) {
+      return
+    }
+    const nonNullColorPalette = colorPalette
+    const blockIdList = selectBlock.map(block => {
+      const colorData = minecraftBlockData[block]
+      const colorBlock = (colorData.tag as unknown as string[]).includes(
+        'color'
+      )
+        ? block.replace('item', selectColorBlock)
+        : block
+      return colorBlock
+    })
+    const blockData = nonNullColorPalette.map(row => {
+      return row.map(color => {
+        const key = Number(color.key)
+        return blockIdList[key - 1]
+      })
+    })
+    const fillCommand = convertToFillCommand(
+      blockData,
+      positionX,
+      positionY,
+      positionZ,
+      'z',
+      'x'
+    )
+    setFillCommand(fillCommand.join('\n'))
   }
 
   const updateSelectBlock = <I extends number>(
@@ -303,7 +336,11 @@ function ImageToPixelArt ({
         {/* Create two buttons, one to create Fill Command and one to display the table */}
         <div className='row justify-content-center m-0'>
           <div className='col-4'>
-            <button type='button' className='btn btn-primary m-3'>
+            <button
+              type='button'
+              className='btn btn-primary m-3'
+              onClick={onClickFillCommand}
+            >
               {selectButton === 'fill' && (
                 <span
                   className='spinner-border spinner-border-sm mx-1'
@@ -331,6 +368,23 @@ function ImageToPixelArt ({
             </button>
           </div>
         </div>
+        {/* fillコマンドを表示する入力フォーム(入力不可)を表示する */}
+        {fillCommand !== null && (
+          <div className='row m-0'>
+            <div className='col-auto'>{t('imageToPixelArt.fillCommand')}</div>
+            <div className='col'>
+              <textarea
+                className='form-control'
+                readOnly
+                rows={10}
+                value={fillCommand}
+                onFocus={e => {
+                  e.target.select()
+                }}
+              />
+            </div>
+          </div>
+        )}
         {/* display selectBlock */}
         <SelectBlock
           selectBlock={selectBlock}
