@@ -94,7 +94,7 @@ export const minecraftColorData: ReadonlyArray<{
     id: 13,
     key: 'WOOD',
     color: { r: 143, g: 119, b: 72 },
-    block: ['chiseled_bookshelf', 'oak_planks', 'bookshelf']
+    block: ['oak_planks', 'chiseled_bookshelf', 'bookshelf']
   },
   {
     id: 14,
