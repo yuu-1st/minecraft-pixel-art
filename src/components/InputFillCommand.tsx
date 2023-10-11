@@ -6,12 +6,10 @@ import { addPopup } from './Popup'
 
 interface InputFillCommandProps {
   onDisplayMapTable: (mapBlockData: MapBlockData) => void
-  onDisplayImageToPixelArt: () => void
 }
 
 function InputFillCommand ({
-  onDisplayMapTable: onInputFillCommand,
-  onDisplayImageToPixelArt
+  onDisplayMapTable: onInputFillCommand
 }: InputFillCommandProps): JSX.Element {
   const [fillCommand, setFillCommand] = React.useState('')
   const { t } = useTranslation()
@@ -45,7 +43,6 @@ function InputFillCommand ({
 
   return (
     <div>
-      <p>{t('tableTitle')}</p>
       <div className='m-3'>
         <label htmlFor='fillCommand' className='form-label'>
           {t('inputFill.header')}
@@ -64,13 +61,6 @@ function InputFillCommand ({
         onClick={onClickSend}
       >
         {t('inputFill.send')}
-      </button>
-      <button
-        type='button'
-        className='btn btn-primary m-3'
-        onClick={onDisplayImageToPixelArt}
-      >
-        {t('inputFill.inputImage')}
       </button>
     </div>
   )

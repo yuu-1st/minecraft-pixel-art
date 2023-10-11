@@ -27,7 +27,8 @@ export const resources = {
         table: 'テーブルを表示する'
       },
       mapTable: {
-        inputCoordinate: '左上の座標'
+        inputCoordinate: '左上の座標',
+        noMapData: '他の項目で地図を生成すると表示されます。'
       }
     }
   },
@@ -54,7 +55,8 @@ export const resources = {
         table: 'Show table'
       },
       mapTable: {
-        inputCoordinate: 'Upper left coordinate'
+        inputCoordinate: 'Upper left coordinate',
+        noMapData: 'It will be displayed when you generate a map with other items.'
       }
     }
   }
@@ -83,6 +85,7 @@ export const resources = {
       }
       mapTable: {
         inputCoordinate: string
+        noMapData: string
       }
     }
   }

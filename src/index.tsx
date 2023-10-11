@@ -9,6 +9,8 @@ import RenderMapTable from './components/RenderMapTable'
 import { MapBlockData } from './lib/convertToObject'
 import { i18nInit } from './lib/i18n'
 import { assertNever } from './lib/object'
+import HeaderTab from './components/HeaderTab'
+import { useTranslation } from 'react-i18next'
 
 await i18nInit()
 
@@ -17,42 +19,67 @@ if (rootElement === null) {
   throw new Error('root element not found')
 }
 
-type ShowComponent = 'inputFillCommand' | 'renderMapTable' | 'imageToPixelArt'
+const ShowComponentList = [
+  'command',
+  'map',
+  'image'
+] as const
+
+type ShowComponentType = typeof ShowComponentList[number]
+
+const urlHash = window.location.hash.slice(1)
+const defaultSelect = (
+  ShowComponentList.includes(urlHash as ShowComponentType)
+    ? urlHash
+    : 'command'
+) as ShowComponentType
 
 function App (): React.JSX.Element {
+  const { t } = useTranslation()
   const [showComponent, setShowComponent] =
-    React.useState<ShowComponent>('inputFillCommand')
+    React.useState<ShowComponentType>(defaultSelect)
   const [mapBlockData, setMapBlockData] = React.useState<MapBlockData | null>(
     null
   )
 
   const onDisplayMapTable = (mapBlockData: MapBlockData): void => {
     setMapBlockData(mapBlockData)
-    setShowComponent('renderMapTable')
+    setShowComponent('map')
   }
 
-  const onDisplayImageToPixelArt = (): void => {
-    setShowComponent('imageToPixelArt')
+  const onHeaderTabSelect = (select: string): void => {
+    if (ShowComponentList.includes(select as ShowComponentType)) {
+      setShowComponent(select as ShowComponentType)
+      return
+    }
+    throw new Error(`${select} is not ShowComponent`)
   }
 
-  switch (showComponent) {
-    case 'renderMapTable':
-      if (mapBlockData === null) {
-        throw new Error('fillCommand is null')
-      }
-      return <RenderMapTable tableItem={mapBlockData} />
-    case 'inputFillCommand':
-      return (
-        <InputFillCommand
-          onDisplayMapTable={onDisplayMapTable}
-          onDisplayImageToPixelArt={onDisplayImageToPixelArt}
-        />
-      )
-    case 'imageToPixelArt':
-      return <ImageToPixelArt onDisplayMapTable={onDisplayMapTable} />
-    default:
-      return assertNever(showComponent)
-  }
+  const body = (() => {
+    switch (showComponent) {
+      case 'map':
+        if (mapBlockData === null) {
+          return <>{t('mapTable.noMapData')}</>
+        }
+        return <RenderMapTable tableItem={mapBlockData} />
+      case 'command':
+        return (
+          <InputFillCommand
+            onDisplayMapTable={onDisplayMapTable}
+          />
+        )
+      case 'image':
+        return <ImageToPixelArt onDisplayMapTable={onDisplayMapTable} />
+      default:
+        return assertNever(showComponent)
+    }
+  })()
+  return (
+    <>
+      <HeaderTab select={showComponent} updateSelect={onHeaderTabSelect} />
+      {body}
+    </>
+  )
 }
 
 const root = createRoot(rootElement)
