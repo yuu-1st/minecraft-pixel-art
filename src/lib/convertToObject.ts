@@ -72,7 +72,7 @@ export function convertToObject (
  * ```
  * planeAxis => [vertical][horizontal]
  * x => [z][y]
- * y => [x][z]
+ * y => [z][x]
  * z => [x][y]
  * ```
  * @param fillCommandObject FillCommandObject
@@ -98,10 +98,10 @@ export function addFillCommandObjectToArray (
   const maxY = Math.max(fromY, toY)
   const minZ = Math.min(fromZ, toZ)
   const maxZ = Math.max(fromZ, toZ)
-  const verticalMin = (planeAxis === 'x' ? minZ : minX) - startVertical
-  const verticalMax = (planeAxis === 'x' ? maxZ : maxX) - startVertical
-  const horizontalMin = (planeAxis === 'y' ? minZ : minY) - startHorizontal
-  const horizontalMax = (planeAxis === 'y' ? maxZ : maxY) - startHorizontal
+  const verticalMin = (planeAxis === 'z' ? minX : minZ) - startVertical
+  const verticalMax = (planeAxis === 'z' ? maxX : maxZ) - startVertical
+  const horizontalMin = (planeAxis === 'y' ? minX : minY) - startHorizontal
+  const horizontalMax = (planeAxis === 'y' ? maxX : maxY) - startHorizontal
   const planeMin =
     planeAxis === 'x' ? minX : planeAxis === 'y' ? minY : minZ
   const planeMax =
@@ -143,7 +143,7 @@ export interface FillData {
 export function createArrayFromFillCommands (
   fillCommands: string[],
   planeAxis: 'x' | 'y' | 'z' = 'y',
-  planePosition: number = 0,
+  planePosition: number = Number.NaN,
   defaultBlock = 'air'
 ): FillData {
   const fillCommandObjects = fillCommands.map(command =>
@@ -172,13 +172,15 @@ export function createArrayFromFillCommands (
   const arraySizeX = Math.abs(toX - fromX) + 1
   const arraySizeY = Math.abs(toY - fromY) + 1
   const arraySizeZ = Math.abs(toZ - fromZ) + 1
-  const arraySizeFirst = planeAxis === 'x' ? arraySizeY : arraySizeX
-  const arraySizeSecond = planeAxis === 'z' ? arraySizeY : arraySizeZ
+  const arraySizeFirst = planeAxis === 'z' ? arraySizeX : arraySizeZ
+  const arraySizeSecond = planeAxis === 'y' ? arraySizeX : arraySizeY
   let array = Array.from({ length: arraySizeFirst }, () =>
     Array.from({ length: arraySizeSecond }, () => defaultBlock)
   )
-  const startFirst = planeAxis === 'x' ? fromY : fromX
-  const startSecond = planeAxis === 'z' ? fromY : fromZ
+  const startFirst = planeAxis === 'z' ? fromX : fromZ
+  const startSecond = planeAxis === 'y' ? fromX : fromY
+  const startThird = planeAxis === 'x' ? fromX : planeAxis === 'y' ? fromY : fromZ
+  const planePos = Number.isNaN(planePosition) ? startThird : planePosition
 
   fillCommandObjects.forEach(fillCommandObject => {
     array = addFillCommandObjectToArray(
@@ -187,7 +189,7 @@ export function createArrayFromFillCommands (
       startFirst,
       startSecond,
       planeAxis,
-      planePosition
+      planePos
     )
   })
   return {

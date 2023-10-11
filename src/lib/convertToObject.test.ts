@@ -181,12 +181,12 @@ describe('test addFillCommandObjectToArray', () => {
       4,
       [
         ['', '', '', '', '', '', '', '', '', ''],
-        ['', '', '', 'stone', 'stone', 'stone', 'stone', '', '', ''],
-        ['', '', '', 'stone', 'stone', 'stone', 'stone', '', '', ''],
-        ['', '', '', 'stone', 'stone', 'stone', 'stone', '', '', ''],
-        ['', '', '', 'stone', 'stone', 'stone', 'stone', '', '', ''],
         ['', '', '', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '', ''],
+        ['', 'stone', 'stone', 'stone', 'stone', '', '', '', '', ''],
+        ['', 'stone', 'stone', 'stone', 'stone', '', '', '', '', ''],
+        ['', 'stone', 'stone', 'stone', 'stone', '', '', '', '', ''],
+        ['', 'stone', 'stone', 'stone', 'stone', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '', '']
@@ -211,8 +211,8 @@ describe('test addFillCommandObjectToArray', () => {
       ]
     ],
     [
-      1,
       3,
+      1,
       'y',
       4,
       [
@@ -229,15 +229,15 @@ describe('test addFillCommandObjectToArray', () => {
       ]
     ],
     [
-      2,
       3,
+      2,
       'y',
       4,
       [
-        ['stone', 'stone', 'stone', 'stone', '', '', '', '', '', ''],
-        ['stone', 'stone', 'stone', 'stone', '', '', '', '', '', ''],
-        ['stone', 'stone', 'stone', 'stone', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', '', ''],
+        ['stone', 'stone', 'stone', '', '', '', '', '', '', ''],
+        ['stone', 'stone', 'stone', '', '', '', '', '', '', ''],
+        ['stone', 'stone', 'stone', '', '', '', '', '', '', ''],
+        ['stone', 'stone', 'stone', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '', ''],
@@ -246,7 +246,7 @@ describe('test addFillCommandObjectToArray', () => {
         ['', '', '', '', '', '', '', '', '', '']
       ]
     ]
-  ])('success', (startX, startY, planePosition, planeTarget, expected) => {
+  ])('success', (startV, startH, planePosition, planeTarget, expected) => {
     const command = {
       fromX: 1,
       fromY: 2,
@@ -259,12 +259,12 @@ describe('test addFillCommandObjectToArray', () => {
     const targetArray = Array.from({ length: 10 }, () =>
       Array.from({ length: 10 }, () => '')
     )
-    it(`test fillArray(${startX}, ${startY}, ${planePosition}, ${planeTarget})`, () => {
+    it(`test fillArray(${startV}, ${startH}, ${planePosition}, ${planeTarget})`, () => {
       const result = addFillCommandObjectToArray(
         command,
         targetArray,
-        startX,
-        startY,
+        startV,
+        startH,
         planePosition,
         planeTarget
       )
@@ -278,8 +278,8 @@ describe('test createArrayFromFillCommands', () => {
     [
       [
         'fill 1 0 1 3 0 3 stone',
-        'fill 1 0 4 3 0 6 white_wool',
-        'fill 1 0 7 3 0 9 stone'
+        'fill 4 0 1 6 0 3 white_wool',
+        'fill 7 0 1 9 0 3 stone'
       ],
       {
         mapBlock: [
@@ -323,7 +323,7 @@ describe('test createArrayFromFillCommands', () => {
       }
     ],
     [
-      ['fill 1 0 1 3 0 3 stone', 'fill 2 0 4 4 0 6 white_wool'],
+      ['fill 1 0 1 3 0 3 stone', 'fill 4 0 2 6 0 4 white_wool'],
       {
         mapBlock: [
           ['stone', 'stone', 'stone', 'air', 'air', 'air'],

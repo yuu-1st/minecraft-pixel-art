@@ -35,9 +35,9 @@ describe('getOneChunkFromArray', () => {
       arrayMap(16, () => arrayMap(16, () => findNumberedArray('stone')))
     ],
     [
-      [1, 0],
-      arrayMap(16, indexX =>
-        arrayMap(16, indexZ => {
+      [0, 1],
+      arrayMap(16, indexZ =>
+        arrayMap(16, indexX => {
           if (indexX < 4) {
             return findNumberedArray('stone')
           } else {
@@ -47,9 +47,9 @@ describe('getOneChunkFromArray', () => {
       )
     ],
     [
-      [3, 0],
-      arrayMap(16, indexX =>
-        arrayMap(16, indexZ => {
+      [0, 3],
+      arrayMap(16, indexZ =>
+        arrayMap(16, indexX => {
           if (indexX < 13) {
             return findNumberedArray('red_wool')
           } else {
@@ -59,9 +59,9 @@ describe('getOneChunkFromArray', () => {
       )
     ],
     [
-      [-1, 0],
-      arrayMap(16, indexX =>
-        arrayMap(16, indexZ => {
+      [0, -1],
+      arrayMap(16, indexZ =>
+        arrayMap(16, indexX => {
           return { blockName: '', blockNumber: -1 }
         })
       )
@@ -77,10 +77,10 @@ describe('getOneChunkFromArray', () => {
   describe.each([
     [
       [0, 0],
-      1,
       0,
-      arrayMap(16, indexX =>
-        arrayMap(16, indexZ => {
+      1,
+      arrayMap(16, indexZ =>
+        arrayMap(16, indexX => {
           if (indexX < 1) {
             return { blockName: '', blockNumber: -1 }
           } else {

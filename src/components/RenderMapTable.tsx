@@ -401,8 +401,8 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
             setItems(items)
           }}
           selectedBlock={targetItem}
-          baseVertical={tableItem.minX}
-          baseHorizontal={tableItem.minZ}
+          baseVertical={tableItem.minZ}
+          baseHorizontal={tableItem.minX}
         />
       </div>
       <RenderSideInfo
