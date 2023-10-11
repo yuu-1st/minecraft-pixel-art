@@ -75,7 +75,7 @@ function CellData ({
       {data.blockNumber}
     </div>
   )
-  const blockName = convertBlockKeyToName(data.blockName, 'ja')
+  const blockName = convertBlockKeyToName(data.blockName)
   return (
     <OverlayTrigger
       placement='top'
@@ -314,7 +314,7 @@ function RenderSideInfo ({
     (acc, cur) => {
       const index = acc.findIndex(item => item.blockNumber === cur.blockNumber)
       if (index === -1) {
-        const blockName = convertBlockKeyToName(cur.blockName, 'ja')
+        const blockName = convertBlockKeyToName(cur.blockName)
         acc.push({ ...cur, count: 1, blockName })
       } else {
         acc[index].count += 1

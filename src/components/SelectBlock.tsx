@@ -1,9 +1,9 @@
-import React from 'react'
+import { getLanguage } from '../lib/i18n'
 import {
-  minecraftColorData,
-  minecraftBlockData,
-  colorBlockData
+  colorBlockData,
+  minecraftColorData
 } from '../lib/minecraftColorData'
+import { convertBlockKeyToName } from '../lib/minecraftDataFunction'
 
 const none: 'none' = 'none'
 
@@ -51,10 +51,9 @@ function ShowColorBox ({
           value={block}
         >
           {[none, ...colorData.block].map(blockData => {
-            const block = minecraftBlockData[blockData]
             return (
               <option key={blockData} value={blockData}>
-                {block.name.ja}
+                {convertBlockKeyToName(blockData)}
               </option>
             )
           })}
@@ -93,7 +92,7 @@ function SetColorBlock ({
         {colorBlockData.map(blockData => {
           return (
             <option key={blockData.id} value={blockData.key}>
-              {blockData.name.ja}
+              {blockData.name[getLanguage()]}
             </option>
           )
         })}

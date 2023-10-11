@@ -1,3 +1,4 @@
+import { LanguageType, getLanguage } from './i18n'
 import {
   colorBlockData,
   colorData,
@@ -13,7 +14,7 @@ import {
  */
 export function convertBlockKeyToName (
   key: string,
-  lang: 'ja' | 'en',
+  lang: LanguageType = getLanguage(),
   needError: boolean = false
 ): string {
   if (key in minecraftBlockData) {

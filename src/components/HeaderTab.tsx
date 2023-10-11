@@ -1,25 +1,33 @@
-import { Navbar, Nav } from 'react-bootstrap'
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import { LanguageList, LanguageType, changeLanguage } from '../lib/i18n'
+import { useEffect, useState } from 'react'
 
 interface Props {
   select: string
-  updateSelect: (select: string) => void
+  updateSelect: (select: string | null) => void
 }
 
 function HeaderTab ({ select, updateSelect }: Props): JSX.Element {
-  const { t } = useTranslation()
-  const handleSelect = (eventKey: string | null): void => {
-    if (eventKey !== null) {
-      updateSelect(eventKey)
+  const { t, i18n } = useTranslation()
+  const [language, setLanguage] = useState<LanguageType>('ja')
+
+  const onLanguageSelect = (select: string | null): void => {
+    if (select !== null && LanguageList.includes(select as LanguageType)) {
+      setLanguage(select as LanguageType)
     }
   }
+
+  useEffect(() => {
+    void changeLanguage(language)
+  }, [language, i18n])
 
   return (
     <Navbar collapseOnSelect expand='sm' bg='dark' variant='dark'>
       <Navbar.Brand href='#command'>{t('tableTitle')}</Navbar.Brand>
       <Navbar.Toggle aria-controls='responsive-navbar-nav' />
       <Navbar.Collapse id='responsive-navbar-nav'>
-        <Nav className='mr-auto' activeKey={select} onSelect={handleSelect}>
+        <Nav className='mr-auto' activeKey={select} onSelect={updateSelect}>
           <Nav.Link eventKey='command' href='#command'>
             Command
           </Nav.Link>
@@ -29,6 +37,10 @@ function HeaderTab ({ select, updateSelect }: Props): JSX.Element {
           <Nav.Link eventKey='map' href='#map'>
             Map
           </Nav.Link>
+          <NavDropdown title='Language' id='collasible-nav-dropdown' onSelect={onLanguageSelect}>
+            <NavDropdown.Item eventKey='en'>English</NavDropdown.Item>
+            <NavDropdown.Item eventKey='ja'>日本語</NavDropdown.Item>
+          </NavDropdown>
         </Nav>
       </Navbar.Collapse>
     </Navbar>

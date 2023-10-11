@@ -3,6 +3,10 @@ import { initReactI18next } from 'react-i18next'
 
 export type ErrorType = keyof typeof resources['en']['translation']['errorMessage']
 
+export const LanguageList = ['ja', 'en'] as const
+
+export type LanguageType = typeof LanguageList[number]
+
 export const resources = {
   ja: {
     translation: {
@@ -61,7 +65,7 @@ export const resources = {
     }
   }
 } as const satisfies {
-  [key: string]: {
+  [key in LanguageType]: {
     translation: {
       tableTitle: string
       zoom: string
@@ -102,9 +106,17 @@ export async function i18nInit (): Promise<TFunction<'translation', undefined>> 
 }
 
 export async function changeLanguage (
-  language: keyof typeof resources
+  language: LanguageType
 ): Promise<void> {
   await i18n.changeLanguage(language)
+}
+
+export function getLanguage (): LanguageType {
+  const language = i18n.language
+  if (LanguageList.includes(language as LanguageType)) {
+    return language as LanguageType
+  }
+  return 'en'
 }
 
 export const i18nInstance = await i18nInit()

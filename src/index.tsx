@@ -47,12 +47,10 @@ function App (): React.JSX.Element {
     setShowComponent('map')
   }
 
-  const onHeaderTabSelect = (select: string): void => {
-    if (ShowComponentList.includes(select as ShowComponentType)) {
+  const onHeaderTabSelect = (select: string | null): void => {
+    if (select !== null && ShowComponentList.includes(select as ShowComponentType)) {
       setShowComponent(select as ShowComponentType)
-      return
     }
-    throw new Error(`${select} is not ShowComponent`)
   }
 
   const body = (() => {
