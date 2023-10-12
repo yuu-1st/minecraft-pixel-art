@@ -1,8 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { getLanguage } from '../lib/i18n'
-import {
-  colorBlockData,
-  minecraftColorData
-} from '../lib/minecraftColorData'
+import { colorBlockData, minecraftColorData } from '../lib/minecraftColorData'
 import { convertBlockKeyToName } from '../lib/minecraftDataFunction'
 
 const none: 'none' = 'none'
@@ -71,16 +69,15 @@ function SetColorBlock ({
   block: typeof colorBlockData[number]['key']
   setBlock: (block: typeof colorBlockData[number]['key']) => void
 }): JSX.Element {
+  const { t } = useTranslation()
   return (
     <div className='row my-3'>
       {/* Display a box to display the color */}
       <div
-        className='col-auto mx-2 d-flex justify-content-center align-items-center p-0'
-        style={{
-          width: '30px',
-          height: '30px'
-        }}
-      />
+        className='col mx-2 p-0'
+      >
+        {t('selectBlock.dyeSelect')} :
+      </div>
       {/* Select the block to use in that color */}
       <select
         className='col mx-2 form-select'
