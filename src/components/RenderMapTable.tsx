@@ -171,13 +171,15 @@ function RenderTable ({
   showSideInfo,
   selectedBlock,
   baseVertical,
-  baseHorizontal
+  baseHorizontal,
+  widthOverSize
 }: {
   tableData: BlockCellData[][]
   showSideInfo: (items: BlockCellData[][]) => void
   selectedBlock: BlockCellData | null
   baseVertical: number
   baseHorizontal: number
+  widthOverSize: number
 }): React.JSX.Element {
   function getChunkCount (start: number, end: number): number {
     const startChunk = Math.floor(start / 16)
@@ -209,6 +211,9 @@ function RenderTable ({
           />
         )
       })}
+      <th className='p-0'>
+        <div style={{ width: `${widthOverSize}vw` }} />
+      </th>
     </tr>
   )
   const tbody = arrayMap(useChunkVertical, v => {
@@ -249,6 +254,9 @@ function RenderTable ({
       <tr key={`hb-${v}`}>
         {vAxis}
         {chunk}
+        <th className='p-0'>
+          <div style={{ width: `${widthOverSize}vw` }} />
+        </th>
       </tr>
     )
   })
@@ -404,36 +412,39 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
     <div className='App'>
       <header className='App-header'>{t('tableTitle')}</header>
       <ZoomControl zoom={zoom} setZoom={setZoom} />
-      <div
-        className='table-responsive overflow-scroll'
-        style={{
-          transform: `scale(${zoom})`,
-          height: `${100 / zoom}vh`,
-          width: `${100 / zoom}vw`,
-          transformOrigin: 'top left'
-        }}
-      >
-        <RenderTable
-          tableData={tableItem.blockMap}
-          showSideInfo={(items: BlockCellData[][]) => {
-            setShowSideInfo(true)
-            setItems(items)
+      <div style={{ height: '100vh' }}>
+        <div
+          className='table-responsive overflow-scroll'
+          style={{
+            transform: `scale(${zoom})`,
+            height: `${100 / zoom}vh`,
+            width: `${100 / zoom}vw`,
+            transformOrigin: 'top left'
+          }}
+        >
+          <RenderTable
+            tableData={tableItem.blockMap}
+            showSideInfo={(items: BlockCellData[][]) => {
+              setShowSideInfo(true)
+              setItems(items)
+            }}
+            selectedBlock={targetItem}
+            baseVertical={tableItem.minZ}
+            baseHorizontal={tableItem.minX}
+            widthOverSize={showSideInfo ? 20 / zoom : 0}
+          />
+        </div>
+        <RenderSideInfo
+          showSideInfo={showSideInfo}
+          disableShowSideInfo={() => {
+            setShowSideInfo(false)
+            setTargetItem(null)
           }}
           selectedBlock={targetItem}
-          baseVertical={tableItem.minZ}
-          baseHorizontal={tableItem.minX}
+          updateSelectBlock={(block: BlockCellData) => setTargetItem(block)}
+          items={items}
         />
       </div>
-      <RenderSideInfo
-        showSideInfo={showSideInfo}
-        disableShowSideInfo={() => {
-          setShowSideInfo(false)
-          setTargetItem(null)
-        }}
-        selectedBlock={targetItem}
-        updateSelectBlock={(block: BlockCellData) => setTargetItem(block)}
-        items={items}
-      />
     </div>
   )
 }
