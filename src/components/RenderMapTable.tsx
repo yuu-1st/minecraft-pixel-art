@@ -1,3 +1,4 @@
+import 'animate.css/animate.min.css'
 import React from 'react'
 import {
   ListGroup,
@@ -184,8 +185,14 @@ function RenderTable ({
     const chunkCount = endChunk - startChunk + 1
     return chunkCount
   }
-  const useChunkVertical = getChunkCount(baseVertical, baseVertical + tableData.length - 1)
-  const useChunkHorizontal = getChunkCount(baseHorizontal, baseHorizontal + tableData[0].length - 1)
+  const useChunkVertical = getChunkCount(
+    baseVertical,
+    baseVertical + tableData.length - 1
+  )
+  const useChunkHorizontal = getChunkCount(
+    baseHorizontal,
+    baseHorizontal + tableData[0].length - 1
+  )
   const hAxis = (
     <tr>
       <th style={{ position: 'sticky', left: 0 }} className='p-0'>
@@ -300,6 +307,7 @@ function RenderSideInfo ({
   selectedBlock,
   updateSelectBlock
 }: RenderSideInfoProps): React.JSX.Element {
+  const animateComponent = React.useRef<HTMLDivElement>(null)
   const sideInfoStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
@@ -324,16 +332,27 @@ function RenderSideInfo ({
     []
   )
 
+  const onClickDisable = (): void => {
+    animateComponent.current?.classList.add('animate__fadeOutRight')
+    animateComponent.current?.addEventListener('animationend', () => {
+      disableShowSideInfo()
+    })
+  }
+
   if (showSideInfo) {
     return (
       <div className='position-relative'>
-        <div style={sideInfoStyle}>
+        <div
+          style={sideInfoStyle}
+          className='animate__animated animate__fadeInRight'
+          ref={animateComponent}
+        >
           {/* Display the close button to be hidden */}
           <button
             type='button'
             className='btn-close top-0 end-0 m-2'
             aria-label='Close'
-            onClick={() => disableShowSideInfo()}
+            onClick={() => onClickDisable()}
           />
           <div className='overflow-auto' style={{ height: '100vh' }}>
             {/* Display list of blockNumber and blockName based on itemList */}
