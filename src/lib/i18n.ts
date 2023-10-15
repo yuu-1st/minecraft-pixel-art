@@ -32,7 +32,8 @@ export const resources = {
       },
       mapTable: {
         inputCoordinate: '左上の座標',
-        noMapData: '他の項目で地図を生成すると表示されます。'
+        noMapData: '他の項目で地図を生成すると表示されます。',
+        showFootCoordinate: '足元の座標で表示する'
       },
       selectBlock: {
         dyeSelect: '染色を使ったブロックを選択する'
@@ -63,7 +64,8 @@ export const resources = {
       },
       mapTable: {
         inputCoordinate: 'Upper left coordinate',
-        noMapData: 'It will be displayed when you generate a map with other items.'
+        noMapData: 'It will be displayed when you generate a map with other items.',
+        showFootCoordinate: 'Display with foot coordinates'
       },
       selectBlock: {
         dyeSelect: 'Select a block using dye'
@@ -96,6 +98,7 @@ export const resources = {
       mapTable: {
         inputCoordinate: string
         noMapData: string
+        showFootCoordinate: string
       }
       selectBlock: {
         dyeSelect: string

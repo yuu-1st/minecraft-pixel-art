@@ -121,20 +121,28 @@ function RenderTableMapOneChunk ({
 
 function MapTableCoordinateHorizontal ({
   chunkHorizontal,
-  baseHorizontal
+  baseHorizontal,
+  isFootCoordinate
 }: {
   chunkHorizontal: number
   baseHorizontal: number
+  isFootCoordinate: boolean
 }): React.JSX.Element {
   const table = (
     <SquareCellTableTemplate
       cellItem={[
         arrayMap(16, i => {
-          return (
-            <React.Fragment key={i}>
-              {chunkHorizontal * 16 + i + baseHorizontal}
-            </React.Fragment>
-          )
+          const coordinate = (() => {
+            const pos = chunkHorizontal * 16 + i + baseHorizontal
+            if (isFootCoordinate && pos === -1) {
+              return '-0'
+            }
+            if (isFootCoordinate && pos < 0) {
+              return pos + 1
+            }
+            return pos
+          })()
+          return <React.Fragment key={i}>{coordinate}</React.Fragment>
         })
       ]}
     />
@@ -148,19 +156,27 @@ function MapTableCoordinateHorizontal ({
 
 function MapTableCoordinateVertical ({
   chunkVertical,
-  baseVertical
+  baseVertical,
+  isFootCoordinate
 }: {
   chunkVertical: number
   baseVertical: number
+  isFootCoordinate: boolean
 }): React.JSX.Element {
   return (
     <SquareCellTableTemplate
       cellItem={arrayMap(16, i => {
-        return [
-          <React.Fragment key={i}>
-            {chunkVertical * 16 + i + baseVertical}
-          </React.Fragment>
-        ]
+        const coordinate = (() => {
+          const pos = chunkVertical * 16 + i + baseVertical
+          if (isFootCoordinate && pos === -1) {
+            return '-0'
+          }
+          if (isFootCoordinate && pos < 0) {
+            return pos + 1
+          }
+          return pos
+        })()
+        return [<React.Fragment key={i}>{coordinate}</React.Fragment>]
       })}
     />
   )
@@ -172,7 +188,8 @@ function RenderTable ({
   selectedBlock,
   baseVertical,
   baseHorizontal,
-  widthOverSize
+  widthOverSize,
+  isFootCoordinate
 }: {
   tableData: BlockCellData[][]
   showSideInfo: (items: BlockCellData[][]) => void
@@ -180,6 +197,7 @@ function RenderTable ({
   baseVertical: number
   baseHorizontal: number
   widthOverSize: number
+  isFootCoordinate: boolean
 }): React.JSX.Element {
   function getChunkCount (start: number, end: number): number {
     const startChunk = Math.floor(start / 16)
@@ -208,6 +226,7 @@ function RenderTable ({
             key={`h-${h}`}
             chunkHorizontal={h}
             baseHorizontal={Math.floor(baseHorizontal / 16) * 16}
+            isFootCoordinate={isFootCoordinate}
           />
         )
       })}
@@ -226,6 +245,7 @@ function RenderTable ({
         <MapTableCoordinateVertical
           chunkVertical={v}
           baseVertical={Math.floor(baseVertical / 16) * 16}
+          isFootCoordinate={isFootCoordinate}
         />
       </th>
     )
@@ -408,9 +428,25 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
   const [showSideInfo, setShowSideInfo] = React.useState(false)
   const [items, setItems] = React.useState<BlockCellData[][]>([])
   const [targetItem, setTargetItem] = React.useState<BlockCellData | null>(null)
+  const [isFootCoordinate, setIsFootCoordinate] = React.useState(false)
   return (
     <div className='App'>
       <header className='App-header'>{t('tableTitle')}</header>
+      {/* チェックボックスを表示する */}
+      <div>
+        <div className='form-check form-switch'>
+          <input
+            className='form-check-input'
+            type='checkbox'
+            id='flexSwitchCheckDefault'
+            checked={isFootCoordinate}
+            onChange={() => setIsFootCoordinate(!isFootCoordinate)}
+          />
+          <label className='form-check-label' htmlFor='flexSwitchCheckDefault'>
+            {t('mapTable.showFootCoordinate')}
+          </label>
+        </div>
+      </div>
       <ZoomControl zoom={zoom} setZoom={setZoom} />
       <div style={{ height: '100vh' }}>
         <div
@@ -432,6 +468,7 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
             baseVertical={tableItem.minZ}
             baseHorizontal={tableItem.minX}
             widthOverSize={showSideInfo ? 20 / zoom : 0}
+            isFootCoordinate={isFootCoordinate}
           />
         </div>
         <RenderSideInfo
