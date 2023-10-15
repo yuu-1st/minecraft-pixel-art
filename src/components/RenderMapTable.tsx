@@ -358,7 +358,7 @@ function RenderSideInfo ({
       return acc
     },
     []
-  )
+  ).sort((a, b) => a.blockNumber - b.blockNumber)
 
   const onClickDisable = (): void => {
     animateComponent.current?.classList.add('animate__fadeOutRight')
