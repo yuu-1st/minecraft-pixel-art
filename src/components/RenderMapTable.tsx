@@ -1,5 +1,5 @@
 import 'animate.css/animate.min.css'
-import React from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import {
   ListGroup,
   ListGroupItem,
@@ -100,26 +100,41 @@ interface RenderTableMapOneChunkProps {
   chunkHorizontal: number
   /** vertical coordinate of the chunk to display. */
   chunkVertical: number
+  /** horizontal coordinate of the chunk to display. */
+  baseHorizontal: number
+  /** vertical coordinate of the chunk to display. */
+  baseVertical: number
 }
 
-function RenderTableMapOneChunk ({
+const RenderTableMapOneChunk = memo(function RenderTableMapOneChunk ({
   tableData,
   showSideInfo,
   selectedBlock,
   chunkHorizontal,
-  chunkVertical
+  chunkVertical,
+  baseHorizontal,
+  baseVertical
 }: RenderTableMapOneChunkProps): React.JSX.Element {
-  const table = arrayMap(tableData.length, v => {
-    return tableData[v].map((data, h) => {
+  const tableDataOneChunk = useMemo(() => {
+    return getOneChunkFromArray(
+      tableData,
+      chunkVertical,
+      chunkHorizontal,
+      baseVertical,
+      baseHorizontal
+    )
+  }, [tableData, chunkVertical, chunkHorizontal, baseVertical, baseHorizontal])
+  const table = arrayMap(tableDataOneChunk.length, v => {
+    return tableDataOneChunk[v].map((data, h) => {
       return <CellData key={h} data={data} selectedBlock={selectedBlock} />
     })
   })
   return (
-    <div onClick={() => showSideInfo(tableData)}>
+    <div onClick={() => showSideInfo(tableDataOneChunk)}>
       <SquareCellTableTemplate cellItem={table} />
     </div>
   )
-}
+})
 
 function MapTableCoordinateHorizontal ({
   chunkHorizontal,
@@ -184,7 +199,7 @@ function MapTableCoordinateVertical ({
   )
 }
 
-function RenderTable ({
+const RenderTable = memo(function RenderTable ({
   tableData,
   showSideInfo,
   selectedBlock,
@@ -257,17 +272,13 @@ function RenderTable ({
       return (
         <td key={`td-${v * useChunkHorizontal + h}`} className='p-0'>
           <RenderTableMapOneChunk
-            tableData={getOneChunkFromArray(
-              tableData,
-              chunkV,
-              chunkH,
-              baseVertical,
-              baseHorizontal
-            )}
+            tableData={tableData}
             showSideInfo={showSideInfo}
             selectedBlock={selectedBlock}
-            chunkHorizontal={v}
-            chunkVertical={h}
+            chunkHorizontal={chunkH}
+            chunkVertical={chunkV}
+            baseHorizontal={baseHorizontal}
+            baseVertical={baseVertical}
           />
         </td>
       )
@@ -288,7 +299,7 @@ function RenderTable ({
       <tbody>{tbody}</tbody>
     </Table>
   )
-}
+})
 
 function ZoomControl ({
   zoom,
@@ -448,10 +459,19 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
   const [items, setItems] = React.useState<BlockCellData[][]>([])
   const [targetItem, setTargetItem] = React.useState<BlockCellData | null>(null)
   const [isFootCoordinate, setIsFootCoordinate] = React.useState(false)
+
+  const onShowSideInfo = useCallback(
+    (items: BlockCellData[][]) => {
+      setShowSideInfo(true)
+      setItems(items)
+    },
+    [setShowSideInfo, setItems]
+  )
+
   return (
     <div className='App'>
       <header className='App-header'>{t('tableTitle')}</header>
-      {/* チェックボックスを表示する */}
+      {/* Display the checkbox */}
       <div>
         <div className='form-check form-switch'>
           <input
@@ -479,28 +499,25 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
         >
           <RenderTable
             tableData={tableItem.blockMap}
-            showSideInfo={(items: BlockCellData[][]) => {
-              setShowSideInfo(true)
-              setItems(items)
-            }}
-            selectedBlock={targetItem}
+            showSideInfo={onShowSideInfo}
+            selectedBlock={null}
             baseVertical={tableItem.minZ}
             baseHorizontal={tableItem.minX}
             widthOverSize={showSideInfo ? 20 / zoom : 0}
             isFootCoordinate={isFootCoordinate}
           />
         </div>
-        <RenderSideInfo
-          showSideInfo={showSideInfo}
-          disableShowSideInfo={() => {
-            setShowSideInfo(false)
-            setTargetItem(null)
-          }}
-          selectedBlock={targetItem}
-          updateSelectBlock={(block: BlockCellData) => setTargetItem(block)}
-          items={items}
-        />
       </div>
+      <RenderSideInfo
+        showSideInfo={showSideInfo}
+        disableShowSideInfo={() => {
+          setShowSideInfo(false)
+          setTargetItem(null)
+        }}
+        selectedBlock={targetItem}
+        updateSelectBlock={(block: BlockCellData) => setTargetItem(block)}
+        items={items}
+      />
     </div>
   )
 }
