@@ -9,6 +9,7 @@ import {
 import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
 import { BlockCellData, MapBlockData } from '../lib/convertToObject'
+import { deleteCSS, insertCSS } from '../lib/cssInsert'
 import { getOneChunkFromArray } from '../lib/getOneChunkFromArray'
 import { convertBlockKeyToName } from '../lib/minecraftDataFunction'
 import { arrayMap } from '../lib/object'
@@ -66,9 +67,10 @@ function CellData ({
   if (data.blockNumber === -1) {
     return <>-</>
   }
+  const className = `cell-block-id-${data.blockNumber}`
   const body = (
     <div
-      className='h-100 w-100 d-flex justify-content-center align-items-center'
+      className={`h-100 w-100 d-flex justify-content-center align-items-center ${className}`}
       {...(selectedBlock?.blockNumber === data.blockNumber
         ? { style: selectedBlockBackgroundStyle }
         : {})}
@@ -336,6 +338,7 @@ function RenderSideInfo ({
   updateSelectBlock
 }: RenderSideInfoProps): React.JSX.Element {
   const animateComponent = React.useRef<HTMLDivElement>(null)
+  const [selectedBlockId, setSelectedBlockId] = React.useState(-1)
   const sideInfoStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
@@ -346,8 +349,9 @@ function RenderSideInfo ({
   }
   // Count the number of each BlockCellData included in items and remove duplicates
   const itemFlat = items.flat()
-  const itemLists = itemFlat.reduce<Array<BlockCellData & { count: number }>>(
-    (acc, cur) => {
+  const itemLists = itemFlat
+    /* eslint-disable @typescript-eslint/indent */
+    .reduce<Array<BlockCellData & { count: number }>>((acc, cur) => {
       const index = acc.findIndex(item => item.blockNumber === cur.blockNumber)
       if (index === -1) {
         const blockName = convertBlockKeyToName(cur.blockName)
@@ -356,15 +360,29 @@ function RenderSideInfo ({
         acc[index].count += 1
       }
       return acc
-    },
-    []
-  ).sort((a, b) => a.blockNumber - b.blockNumber)
+    }, [])
+    /* eslint-enable @typescript-eslint/indent */
+    .sort((a, b) => a.blockNumber - b.blockNumber)
 
   const onClickDisable = (): void => {
     animateComponent.current?.classList.add('animate__fadeOutRight')
     animateComponent.current?.addEventListener('animationend', () => {
       disableShowSideInfo()
+      if (selectedBlockId !== -1) {
+        deleteCSS(`.cell-block-id-${selectedBlockId}`)
+        setSelectedBlockId(-1)
+      }
     })
+  }
+
+  const onClickUpdateSelectBlock = (blockId: number): void => {
+    if (selectedBlockId !== -1) {
+      deleteCSS(`.cell-block-id-${selectedBlockId}`)
+    }
+    if (blockId !== -1) {
+      insertCSS(`.cell-block-id-${blockId}`, { backgroundColor: 'yellow' })
+    }
+    setSelectedBlockId(blockId)
   }
 
   if (showSideInfo) {
@@ -390,10 +408,11 @@ function RenderSideInfo ({
                   <ListGroup key={i}>
                     <ListGroupItem
                       className='justify-content-center align-items-center'
-                      {...(selectedBlock?.blockNumber === item.blockNumber
+                      {...(selectedBlockId === item.blockNumber
                         ? { style: selectedBlockBackgroundStyle }
                         : {})}
-                      onClick={() => updateSelectBlock(item)}
+                      // onClick={() => updateSelectBlock(item)}
+                      onClick={() => onClickUpdateSelectBlock(item.blockNumber)}
                     >
                       <div className='row'>
                         <div className='col-auto justify-content-center'>
