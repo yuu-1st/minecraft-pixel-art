@@ -58,11 +58,9 @@ function SquareCellTableTemplate ({
 }
 
 function CellData ({
-  data,
-  selectedBlock
+  data
 }: {
   data: BlockCellData
-  selectedBlock: BlockCellData | null
 }): React.JSX.Element {
   if (data.blockNumber === -1) {
     return <>-</>
@@ -71,9 +69,6 @@ function CellData ({
   const body = (
     <div
       className={`h-100 w-100 d-flex justify-content-center align-items-center ${className}`}
-      {...(selectedBlock?.blockNumber === data.blockNumber
-        ? { style: selectedBlockBackgroundStyle }
-        : {})}
     >
       {data.blockNumber}
     </div>
@@ -94,8 +89,6 @@ interface RenderTableMapOneChunkProps {
   tableData: BlockCellData[][]
   /** Function to display side information. */
   showSideInfo: (items: BlockCellData[][]) => void
-  /** The currently selected block. */
-  selectedBlock: BlockCellData | null
   /** horizontal coordinate of the chunk to display. */
   chunkHorizontal: number
   /** vertical coordinate of the chunk to display. */
@@ -109,7 +102,6 @@ interface RenderTableMapOneChunkProps {
 const RenderTableMapOneChunk = memo(function RenderTableMapOneChunk ({
   tableData,
   showSideInfo,
-  selectedBlock,
   chunkHorizontal,
   chunkVertical,
   baseHorizontal,
@@ -126,7 +118,7 @@ const RenderTableMapOneChunk = memo(function RenderTableMapOneChunk ({
   }, [tableData, chunkVertical, chunkHorizontal, baseVertical, baseHorizontal])
   const table = arrayMap(tableDataOneChunk.length, v => {
     return tableDataOneChunk[v].map((data, h) => {
-      return <CellData key={h} data={data} selectedBlock={selectedBlock} />
+      return <CellData key={h} data={data} />
     })
   })
   return (
@@ -202,7 +194,6 @@ function MapTableCoordinateVertical ({
 const RenderTable = memo(function RenderTable ({
   tableData,
   showSideInfo,
-  selectedBlock,
   baseVertical,
   baseHorizontal,
   widthOverSize,
@@ -210,7 +201,6 @@ const RenderTable = memo(function RenderTable ({
 }: {
   tableData: BlockCellData[][]
   showSideInfo: (items: BlockCellData[][]) => void
-  selectedBlock: BlockCellData | null
   baseVertical: number
   baseHorizontal: number
   widthOverSize: number
@@ -274,7 +264,6 @@ const RenderTable = memo(function RenderTable ({
           <RenderTableMapOneChunk
             tableData={tableData}
             showSideInfo={showSideInfo}
-            selectedBlock={selectedBlock}
             chunkHorizontal={chunkH}
             chunkVertical={chunkV}
             baseHorizontal={baseHorizontal}
@@ -335,18 +324,12 @@ interface RenderSideInfoProps {
   disableShowSideInfo: () => void
   /** Receive an array of items to display in SideInfo. */
   items: BlockCellData[][]
-  /** The currently selected block. */
-  selectedBlock: BlockCellData | null
-  /** Update the selected block. */
-  updateSelectBlock: (block: BlockCellData) => void
 }
 
 function RenderSideInfo ({
   showSideInfo,
   disableShowSideInfo,
-  items,
-  selectedBlock,
-  updateSelectBlock
+  items
 }: RenderSideInfoProps): React.JSX.Element {
   const animateComponent = React.useRef<HTMLDivElement>(null)
   const [selectedBlockId, setSelectedBlockId] = React.useState(-1)
@@ -457,7 +440,6 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
   const [zoom, setZoom] = React.useState(1)
   const [showSideInfo, setShowSideInfo] = React.useState(false)
   const [items, setItems] = React.useState<BlockCellData[][]>([])
-  const [targetItem, setTargetItem] = React.useState<BlockCellData | null>(null)
   const [isFootCoordinate, setIsFootCoordinate] = React.useState(false)
 
   const onShowSideInfo = useCallback(
@@ -500,7 +482,6 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
           <RenderTable
             tableData={tableItem.blockMap}
             showSideInfo={onShowSideInfo}
-            selectedBlock={null}
             baseVertical={tableItem.minZ}
             baseHorizontal={tableItem.minX}
             widthOverSize={showSideInfo ? 20 / zoom : 0}
@@ -512,10 +493,7 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
         showSideInfo={showSideInfo}
         disableShowSideInfo={() => {
           setShowSideInfo(false)
-          setTargetItem(null)
         }}
-        selectedBlock={targetItem}
-        updateSelectBlock={(block: BlockCellData) => setTargetItem(block)}
         items={items}
       />
     </div>
