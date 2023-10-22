@@ -107,9 +107,17 @@ export const resources = {
   }
 }
 
+const lng = (() => {
+  const language = navigator.language
+  if (LanguageList.includes(language as LanguageType)) {
+    return language as LanguageType
+  }
+  return 'en'
+})()
+
 export async function i18nInit (): Promise<TFunction<'translation', undefined>> {
   return await i18n.use(initReactI18next).init({
-    lng: 'ja',
+    lng,
     resources,
     interpolation: {
       escapeValue: false // react already safes from xss
