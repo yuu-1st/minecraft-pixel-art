@@ -37,6 +37,9 @@ function HeaderTab ({ select, updateSelect }: Props): JSX.Element {
           <Nav.Link eventKey='map' href='#map'>
             Map
           </Nav.Link>
+          <Nav.Link eventKey='help' href='#help'>
+            Help
+          </Nav.Link>
           <NavDropdown title='Language' id='collasible-nav-dropdown' onSelect={onLanguageSelect}>
             <NavDropdown.Item eventKey='en'>English</NavDropdown.Item>
             <NavDropdown.Item eventKey='ja'>日本語</NavDropdown.Item>

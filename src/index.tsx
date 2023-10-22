@@ -11,6 +11,7 @@ import { i18nInit } from './lib/i18n'
 import { assertNever } from './lib/object'
 import HeaderTab from './components/HeaderTab'
 import { useTranslation } from 'react-i18next'
+import { HelpComponent } from './components/Help'
 
 await i18nInit()
 
@@ -22,7 +23,8 @@ if (rootElement === null) {
 const ShowComponentList = [
   'command',
   'map',
-  'image'
+  'image',
+  'help'
 ] as const
 
 type ShowComponentType = typeof ShowComponentList[number]
@@ -68,6 +70,8 @@ function App (): React.JSX.Element {
         )
       case 'image':
         return <ImageToPixelArt onDisplayMapTable={onDisplayMapTable} />
+      case 'help':
+        return <HelpComponent />
       default:
         return assertNever(showComponent)
     }
