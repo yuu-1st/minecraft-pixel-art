@@ -390,11 +390,12 @@ function RenderSideInfo ({
           {/* Display the close button to be hidden */}
           <button
             type='button'
-            className='btn-close top-0 end-0 m-2'
+            className='btn-close top-0 end-0'
             aria-label='Close'
             onClick={() => onClickDisable()}
+            style={{ height: '2rem', width: '2rem' }}
           />
-          <div className='overflow-auto' style={{ height: '100vh' }}>
+          <div className='overflow-auto' style={{ height: 'calc(100vh - 2rem)' }}>
             {/* Display list of blockNumber and blockName based on itemList */}
             <ul className='p-1'>
               {itemLists.map((item, i) => {
