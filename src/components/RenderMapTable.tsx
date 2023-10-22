@@ -1,5 +1,5 @@
 import 'animate.css/animate.min.css'
-import React from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import {
   ListGroup,
   ListGroupItem,
@@ -9,6 +9,7 @@ import {
 import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
 import { BlockCellData, MapBlockData } from '../lib/convertToObject'
+import { deleteCSS, insertCSS } from '../lib/cssInsert'
 import { getOneChunkFromArray } from '../lib/getOneChunkFromArray'
 import { convertBlockKeyToName } from '../lib/minecraftDataFunction'
 import { arrayMap } from '../lib/object'
@@ -57,21 +58,17 @@ function SquareCellTableTemplate ({
 }
 
 function CellData ({
-  data,
-  selectedBlock
+  data
 }: {
   data: BlockCellData
-  selectedBlock: BlockCellData | null
 }): React.JSX.Element {
   if (data.blockNumber === -1) {
     return <>-</>
   }
+  const className = `cell-block-id-${data.blockNumber}`
   const body = (
     <div
-      className='h-100 w-100 d-flex justify-content-center align-items-center'
-      {...(selectedBlock?.blockNumber === data.blockNumber
-        ? { style: selectedBlockBackgroundStyle }
-        : {})}
+      className={`h-100 w-100 d-flex justify-content-center align-items-center ${className}`}
     >
       {data.blockNumber}
     </div>
@@ -92,32 +89,44 @@ interface RenderTableMapOneChunkProps {
   tableData: BlockCellData[][]
   /** Function to display side information. */
   showSideInfo: (items: BlockCellData[][]) => void
-  /** The currently selected block. */
-  selectedBlock: BlockCellData | null
   /** horizontal coordinate of the chunk to display. */
   chunkHorizontal: number
   /** vertical coordinate of the chunk to display. */
   chunkVertical: number
+  /** horizontal coordinate of the chunk to display. */
+  baseHorizontal: number
+  /** vertical coordinate of the chunk to display. */
+  baseVertical: number
 }
 
-function RenderTableMapOneChunk ({
+const RenderTableMapOneChunk = memo(function RenderTableMapOneChunk ({
   tableData,
   showSideInfo,
-  selectedBlock,
   chunkHorizontal,
-  chunkVertical
+  chunkVertical,
+  baseHorizontal,
+  baseVertical
 }: RenderTableMapOneChunkProps): React.JSX.Element {
-  const table = arrayMap(tableData.length, v => {
-    return tableData[v].map((data, h) => {
-      return <CellData key={h} data={data} selectedBlock={selectedBlock} />
+  const tableDataOneChunk = useMemo(() => {
+    return getOneChunkFromArray(
+      tableData,
+      chunkVertical,
+      chunkHorizontal,
+      baseVertical,
+      baseHorizontal
+    )
+  }, [tableData, chunkVertical, chunkHorizontal, baseVertical, baseHorizontal])
+  const table = arrayMap(tableDataOneChunk.length, v => {
+    return tableDataOneChunk[v].map((data, h) => {
+      return <CellData key={h} data={data} />
     })
   })
   return (
-    <div onClick={() => showSideInfo(tableData)}>
+    <div onClick={() => showSideInfo(tableDataOneChunk)}>
       <SquareCellTableTemplate cellItem={table} />
     </div>
   )
-}
+})
 
 function MapTableCoordinateHorizontal ({
   chunkHorizontal,
@@ -182,10 +191,9 @@ function MapTableCoordinateVertical ({
   )
 }
 
-function RenderTable ({
+const RenderTable = memo(function RenderTable ({
   tableData,
   showSideInfo,
-  selectedBlock,
   baseVertical,
   baseHorizontal,
   widthOverSize,
@@ -193,7 +201,6 @@ function RenderTable ({
 }: {
   tableData: BlockCellData[][]
   showSideInfo: (items: BlockCellData[][]) => void
-  selectedBlock: BlockCellData | null
   baseVertical: number
   baseHorizontal: number
   widthOverSize: number
@@ -255,17 +262,12 @@ function RenderTable ({
       return (
         <td key={`td-${v * useChunkHorizontal + h}`} className='p-0'>
           <RenderTableMapOneChunk
-            tableData={getOneChunkFromArray(
-              tableData,
-              chunkV,
-              chunkH,
-              baseVertical,
-              baseHorizontal
-            )}
+            tableData={tableData}
             showSideInfo={showSideInfo}
-            selectedBlock={selectedBlock}
-            chunkHorizontal={v}
-            chunkVertical={h}
+            chunkHorizontal={chunkH}
+            chunkVertical={chunkV}
+            baseHorizontal={baseHorizontal}
+            baseVertical={baseVertical}
           />
         </td>
       )
@@ -286,7 +288,7 @@ function RenderTable ({
       <tbody>{tbody}</tbody>
     </Table>
   )
-}
+})
 
 function ZoomControl ({
   zoom,
@@ -322,20 +324,15 @@ interface RenderSideInfoProps {
   disableShowSideInfo: () => void
   /** Receive an array of items to display in SideInfo. */
   items: BlockCellData[][]
-  /** The currently selected block. */
-  selectedBlock: BlockCellData | null
-  /** Update the selected block. */
-  updateSelectBlock: (block: BlockCellData) => void
 }
 
 function RenderSideInfo ({
   showSideInfo,
   disableShowSideInfo,
-  items,
-  selectedBlock,
-  updateSelectBlock
+  items
 }: RenderSideInfoProps): React.JSX.Element {
   const animateComponent = React.useRef<HTMLDivElement>(null)
+  const [selectedBlockId, setSelectedBlockId] = React.useState(-1)
   const sideInfoStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
@@ -346,8 +343,9 @@ function RenderSideInfo ({
   }
   // Count the number of each BlockCellData included in items and remove duplicates
   const itemFlat = items.flat()
-  const itemLists = itemFlat.reduce<Array<BlockCellData & { count: number }>>(
-    (acc, cur) => {
+  const itemLists = itemFlat
+    /* eslint-disable @typescript-eslint/indent */
+    .reduce<Array<BlockCellData & { count: number }>>((acc, cur) => {
       const index = acc.findIndex(item => item.blockNumber === cur.blockNumber)
       if (index === -1) {
         const blockName = convertBlockKeyToName(cur.blockName)
@@ -356,15 +354,29 @@ function RenderSideInfo ({
         acc[index].count += 1
       }
       return acc
-    },
-    []
-  ).sort((a, b) => a.blockNumber - b.blockNumber)
+    }, [])
+    /* eslint-enable @typescript-eslint/indent */
+    .sort((a, b) => a.blockNumber - b.blockNumber)
 
   const onClickDisable = (): void => {
     animateComponent.current?.classList.add('animate__fadeOutRight')
     animateComponent.current?.addEventListener('animationend', () => {
       disableShowSideInfo()
+      if (selectedBlockId !== -1) {
+        deleteCSS(`.cell-block-id-${selectedBlockId}`)
+        setSelectedBlockId(-1)
+      }
     })
+  }
+
+  const onClickUpdateSelectBlock = (blockId: number): void => {
+    if (selectedBlockId !== -1) {
+      deleteCSS(`.cell-block-id-${selectedBlockId}`)
+    }
+    if (blockId !== -1) {
+      insertCSS(`.cell-block-id-${blockId}`, { backgroundColor: 'yellow' })
+    }
+    setSelectedBlockId(blockId)
   }
 
   if (showSideInfo) {
@@ -378,11 +390,12 @@ function RenderSideInfo ({
           {/* Display the close button to be hidden */}
           <button
             type='button'
-            className='btn-close top-0 end-0 m-2'
+            className='btn-close top-0 end-0'
             aria-label='Close'
             onClick={() => onClickDisable()}
+            style={{ height: '2rem', width: '2rem' }}
           />
-          <div className='overflow-auto' style={{ height: '100vh' }}>
+          <div className='overflow-auto' style={{ height: 'calc(100vh - 2rem)' }}>
             {/* Display list of blockNumber and blockName based on itemList */}
             <ul className='p-1'>
               {itemLists.map((item, i) => {
@@ -390,10 +403,11 @@ function RenderSideInfo ({
                   <ListGroup key={i}>
                     <ListGroupItem
                       className='justify-content-center align-items-center'
-                      {...(selectedBlock?.blockNumber === item.blockNumber
+                      {...(selectedBlockId === item.blockNumber
                         ? { style: selectedBlockBackgroundStyle }
                         : {})}
-                      onClick={() => updateSelectBlock(item)}
+                      // onClick={() => updateSelectBlock(item)}
+                      onClick={() => onClickUpdateSelectBlock(item.blockNumber)}
                     >
                       <div className='row'>
                         <div className='col-auto justify-content-center'>
@@ -427,12 +441,20 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
   const [zoom, setZoom] = React.useState(1)
   const [showSideInfo, setShowSideInfo] = React.useState(false)
   const [items, setItems] = React.useState<BlockCellData[][]>([])
-  const [targetItem, setTargetItem] = React.useState<BlockCellData | null>(null)
   const [isFootCoordinate, setIsFootCoordinate] = React.useState(false)
+
+  const onShowSideInfo = useCallback(
+    (items: BlockCellData[][]) => {
+      setShowSideInfo(true)
+      setItems(items)
+    },
+    [setShowSideInfo, setItems]
+  )
+
   return (
     <div className='App'>
       <header className='App-header'>{t('tableTitle')}</header>
-      {/* チェックボックスを表示する */}
+      {/* Display the checkbox */}
       <div>
         <div className='form-check form-switch'>
           <input
@@ -460,28 +482,21 @@ function RenderMapTable ({ tableItem }: RenderMapTableProps): React.JSX.Element 
         >
           <RenderTable
             tableData={tableItem.blockMap}
-            showSideInfo={(items: BlockCellData[][]) => {
-              setShowSideInfo(true)
-              setItems(items)
-            }}
-            selectedBlock={targetItem}
+            showSideInfo={onShowSideInfo}
             baseVertical={tableItem.minZ}
             baseHorizontal={tableItem.minX}
             widthOverSize={showSideInfo ? 20 / zoom : 0}
             isFootCoordinate={isFootCoordinate}
           />
         </div>
-        <RenderSideInfo
-          showSideInfo={showSideInfo}
-          disableShowSideInfo={() => {
-            setShowSideInfo(false)
-            setTargetItem(null)
-          }}
-          selectedBlock={targetItem}
-          updateSelectBlock={(block: BlockCellData) => setTargetItem(block)}
-          items={items}
-        />
       </div>
+      <RenderSideInfo
+        showSideInfo={showSideInfo}
+        disableShowSideInfo={() => {
+          setShowSideInfo(false)
+        }}
+        items={items}
+      />
     </div>
   )
 }
