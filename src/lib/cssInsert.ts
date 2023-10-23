@@ -1,19 +1,9 @@
 import React from 'react'
-import '../../empty.css'
 
 const styleSheet = (() => {
-  const styles = document.styleSheets
-  const index = [...styles].findIndex(style => {
-    const rule = style.cssRules[0]
-    if (rule instanceof CSSStyleRule) {
-      return rule.selectorText === '.empty-css'
-    }
-    return false
-  })
-  if (index === -1) {
-    throw new Error('empty.css is not found')
-  }
-  return styles[index]
+  const style = document.createElement('style')
+  document.head.appendChild(style)
+  return style.sheet as CSSStyleSheet
 })()
 
 /**
