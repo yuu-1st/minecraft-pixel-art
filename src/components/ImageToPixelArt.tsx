@@ -15,6 +15,7 @@ import { arrayMap, sleep } from '../lib/object'
 import { useTranslation } from 'react-i18next'
 import SelectBlock from './SelectBlock'
 import { convertToFillCommand } from '../lib/convertToFillCommand'
+import { InputNumber } from './util/inputNumber'
 
 let jimpData: Jimp | null = null
 let colorPalette: ColorPalette[][] | null = null
@@ -107,23 +108,22 @@ function InputCoordinate ({
     <div className='row m-0 align-items-center'>
       <div className='col-auto g-1'>{t('mapTable.inputCoordinate')}</div>
       <div className='col-auto'> x :</div>
-      <input
-        type='number'
-        className='col form-control'
+      <InputNumber
         value={x}
-        onChange={e => setX(Number(e.target.value))}
+        onChange={setX}
+        className='col form-control'
       />
       <div className='col-auto'> y :</div>
       <input
         type='number'
-        className='form-control col'
+        className='col form-control'
         value={y}
         onChange={e => setY(Number(e.target.value))}
       />
       <div className='col-auto'> z :</div>
       <input
         type='number'
-        className='form-control col'
+        className='col form-control'
         value={z}
         onChange={e => setZ(Number(e.target.value))}
       />
@@ -368,7 +368,7 @@ function ImageToPixelArt ({
             </button>
           </div>
         </div>
-        {/* fillコマンドを表示する入力フォーム(入力不可)を表示する */}
+        {/* display a form that displays the fill command (not editable) */}
         {fillCommand !== null && (
           <div className='row m-0'>
             <div className='col-auto'>{t('imageToPixelArt.fillCommand')}</div>
