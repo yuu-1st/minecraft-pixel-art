@@ -15,7 +15,7 @@ import { arrayMap, sleep } from '../lib/object'
 import { useTranslation } from 'react-i18next'
 import SelectBlock from './SelectBlock'
 import { convertToFillCommand } from '../lib/convertToFillCommand'
-import { InputNumber } from './util/inputNumber'
+import { InputNumber } from './util/InputNumber'
 
 let jimpData: Jimp | null = null
 let colorPalette: ColorPalette[][] | null = null
