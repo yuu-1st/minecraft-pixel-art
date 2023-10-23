@@ -9,6 +9,21 @@ type HelpDataType = {
 
 const helpData: HelpDataType[] = [
   {
+    ja: 'Minecraft マップ生成ツール',
+    en: 'Minecraft map generation tool',
+    position: 'title'
+  },
+  {
+    ja: '概要',
+    en: 'Overview',
+    position: 'subTitle'
+  },
+  {
+    ja: 'このツールは、Minecraft上でドット絵を作成するために、画像をブロックに変換、もしくはfillコマンドで作成できるようにしたものです。',
+    en: 'This tool is a tool that converts images into blocks or creates them with fill commands in order to create pixel art in Minecraft.',
+    position: 'body'
+  },
+  {
     ja: '使い方',
     en: 'How to use',
     position: 'title'
