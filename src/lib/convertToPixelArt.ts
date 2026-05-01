@@ -1,4 +1,3 @@
-import assert from 'assert'
 import { closest_lab, rgb_to_lab } from 'color-diff'
 import { JimpObject, JimpType, ResizeMode } from '../@types/jimp'
 
@@ -41,7 +40,9 @@ export function resizeImage (
   }
   const clone = image.clone()
   if (height === null) {
-    assert(width !== null)
+    if (width === null) {
+      throw new Error('width cannot be null when height is null')
+    }
     return clone.resize(width, Jimp.AUTO, resizeMode)
   }
   if (width === null) {
