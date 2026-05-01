@@ -8,8 +8,8 @@
     "build": "vite build",
     "build-pages": "vite build --base /minecraft-pixel-art/",
     "compile": "tsc",
-    "lint": "ts-standard",
-    "lint-fix": "ts-standard --fix",
+    "lint": "ts-standard --ignore vite.config.ts",
+    "lint-fix": "ts-standard --fix --ignore vite.config.ts",
     "preview": "vite preview",
     "test": "jest",
     "test-with-coverage": "jest --coverage",
@@ -40,7 +40,7 @@
     "ts-node": "^10.9.1",
     "ts-standard": "^12.0.2",
     "typescript": "^5.2.2",
-    "vite": "^4.5.0"
+    "vite": "^6.4.2"
   },
   "dependencies": {
     "animate.css": "^4.1.1",
@@ -53,5 +53,27 @@
     "react-dom": "^18.2.0",
     "react-i18next": "^13.3.1",
     "react-notifications-component": "^4.0.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@babel/helpers": "7.29.2",
+      "@babel/runtime": "7.29.2",
+      "ajv": "6.14.0",
+      "brace-expansion": "1.1.14",
+      "braces": "3.0.3",
+      "cross-spawn": "7.0.6",
+      "diff": "4.0.4",
+      "file-type": "21.3.2",
+      "flatted": "3.4.2",
+      "js-yaml": "4.1.1",
+      "micromatch": "4.0.8",
+      "min-document": "2.19.2",
+      "minimatch": "3.1.4",
+      "nanoid": "3.3.12",
+      "phin": "3.7.1",
+      "picomatch": "2.3.2",
+      "postcss": "8.5.13",
+      "xml2js": "0.6.2"
+    }
   }
 }
