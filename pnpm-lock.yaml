@@ -12,7 +12,7 @@ overrides:
   braces: 3.0.3
   cross-spawn: 7.0.6
   diff: 4.0.4
-  file-type: 21.3.1
+  file-type: 21.3.2
   flatted: 3.4.2
   js-yaml: 4.1.1
   micromatch: 4.0.8
@@ -1030,7 +1030,7 @@ packages:
       any-base: 1.1.0
       buffer: 5.7.1
       exif-parser: 0.1.12
-      file-type: 21.3.1
+      file-type: 21.3.2
       isomorphic-fetch: 3.0.0
       pixelmatch: 4.0.2
       tinycolor2: 1.6.0
@@ -3147,8 +3147,8 @@ packages:
       flat-cache: 3.1.1
     dev: true
 
-  /file-type@21.3.1:
-    resolution: {integrity: sha512-SrzXX46I/zsRDjTb82eucsGg0ODq2NpGDp4HcsFKApPy8P8vACjpJRDoGGMfEzhFC0ry61ajd7f72J3603anBA==}
+  /file-type@21.3.2:
+    resolution: {integrity: sha512-DLkUvGwep3poOV2wpzbHCOnSKGk1LzyXTv+aHFgN2VFl96wnp8YA9YjO2qPzg5PuL8q/SW9Pdi6WTkYOIh995w==}
     engines: {node: '>=20'}
     dependencies:
       '@tokenizer/inflate': 0.4.1
